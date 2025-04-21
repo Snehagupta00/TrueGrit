@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth, SignIn, SignUp } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
-import Navbar from './components/Navbar';
+import Navbar from './components/NavBar';
 import { setAuthToken } from './lib/api';
 
 // Lazy-loaded components
