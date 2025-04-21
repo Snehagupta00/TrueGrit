@@ -1,225 +1,164 @@
-Fitness Tracker-(TrueGrit)
-A full-stack web application designed to help users track their fitness activities, nutrition, and goals. Built with a modern tech stack, it provides a responsive and intuitive interface for managing health and fitness data, with secure authentication powered by Clerk.
-Features
+# <img src="https://raw.githubusercontent.com/Snehagupta00/TrueGrit/main/public/favicon.ico" width="30" height="30"> TrueGrit - Fitness Tracker
 
-User Authentication: Secure sign-in and sign-up with Clerk, supporting email/password and optional OAuth (e.g., Google).
-Activity Logging: Record workouts and activities, including type, duration, and calories burned.
-Nutrition Tracking: Log meals and track calorie intake.
-Goal Setting: Set and monitor fitness goals, such as weight loss or exercise frequency.
-User Profiles: Manage personal information and view fitness progress.
-Dashboard: Visualize activity trends with interactive charts using Recharts.
-Responsive Design: Mobile-friendly UI with light/dark mode support, styled with Tailwind CSS.
-Secure API: Backend protected with Clerk's JWT-based authentication.
+[![Vercel Deployment](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat&logo=vercel)](https://truegrit.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-18.2+-61DAFB?logo=react)](https://react.dev/)
+[![Clerk Auth](https://img.shields.io/badge/Auth-Clerk-8B5CF6)](https://clerk.com)
 
-Tech Stack
-Frontend
+A modern full-stack fitness tracking application that helps users monitor workouts, nutrition, and goals with beautiful visualizations and secure authentication.
 
-React: JavaScript library for building the user interface.
-React Router: For client-side routing.
-Clerk: Authentication and user management.
-Axios: For making API requests.
-Tailwind CSS: Utility-first CSS framework for styling.
-Recharts: For data visualization (charts).
-Framer Motion: For animations.
-React Hot Toast: For notifications.
-Lucide React & Heroicons: For icons.
+🔗 **Live Demo**: [https://truegrit.vercel.app](https://truegrit.vercel.app)
 
-Backend
+![TrueGrit Dashboard Preview](https://raw.githubusercontent.com/Snehagupta00/TrueGrit/main/public/screenshot.png)
 
-Node.js & Express: Server-side framework for building the API.
-MongoDB & Mongoose: NoSQL database for storing user data, activities, nutrition, and goals.
-Clerk: For backend authentication with JWT.
-CORS: For enabling cross-origin requests.
-Dotenv: For environment variable management.
+## ✨ Features
 
-Prerequisites
-Before running the application, ensure you have the following installed:
+### 🏋️ Activity Tracking
+- Log workouts with duration, intensity, and calories burned
+- Exercise library with common movements
+- Progress charts with Recharts
 
-Node.js: Version 18.x or higher.
-MongoDB: A local or cloud MongoDB instance (e.g., MongoDB Atlas).
-Clerk Account: For authentication keys.
+### 🥗 Nutrition Management
+- Food diary with calorie tracking
+- Macronutrient breakdown
+- Meal history visualization
 
-Installation
-1. Clone the Repository
-git clone https://github.com/your-username/fitness-tracker.git
-cd fitness-tracker
+### 🎯 Goal System
+- Set SMART fitness goals
+- Track progress with milestones
+- Receive achievement notifications
 
-2. Set Up the Backend
+### 🔒 Secure Authentication
+- Password & OAuth login via Clerk
+- JWT-protected API endpoints
+- Session management
 
-Navigate to the backend directory:
-cd backend
+### 🎨 Modern UI
+- Light/dark mode toggle
+- Mobile-responsive design
+- Animated transitions with Framer Motion
+- Toast notifications
 
+## 🛠 Tech Stack
 
-Install dependencies:
-npm install
+| Category       | Technologies                                                                 |
+|----------------|-----------------------------------------------------------------------------|
+| **Frontend**   | React 18, Vite, Tailwind CSS, React Router 6, Framer Motion, Recharts      |
+| **Backend**    | Node.js, Express, MongoDB, Mongoose                                        |
+| **Auth**       | Clerk (JWT authentication)                                                 |
+| **Deployment** | Vercel (Frontend), Render/Railway (Backend)                                |
+| **UI**         | Heroicons, Lucide React, React Hot Toast                                   |
 
+## 🚀 Quick Start
 
-Create a .env file in the backend directory with the following:
-MONGO_URI=your_mongodb_connection_string
-PORT=5000
-CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxx
-CLERK_SECRET_KEY=sk_test_xxxxxxxx
+### Prerequisites
+- Node.js ≥18.x
+- MongoDB (local or Atlas)
+- [Clerk](https://clerk.com) account
 
+### Installation
 
-Replace your_mongodb_connection_string with your MongoDB URI.
-Obtain CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY from the Clerk Dashboard.
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/Snehagupta00/TrueGrit.git
+   cd TrueGrit
+   ```
 
+2. **Set up backend**
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env
+   # Fill in your Clerk and MongoDB credentials
+   npm run dev
+   ```
 
-Start the backend server:
-npm run dev
+3. **Set up frontend**
+   ```bash
+   cd ../frontend
+   npm install
+   cp .env.example .env
+   # Add your Clerk publishable key
+   npm run dev
+   ```
 
-The server will run on http://localhost:5000.
+4. **Configure Clerk**
+   - Add `http://localhost:5173` to authorized redirect URLs
+   - Enable authentication methods (Email/Google)
 
+## 📂 Project Structure
 
-3. Set Up the Frontend
-
-Navigate to the frontend directory:
-cd frontend
-
-
-Install dependencies:
-npm install
-
-
-Create a .env file in the frontend directory with the following:
-VITE_API_BASE_URL=http://localhost:5000
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxx
-
-
-Use the same CLERK_PUBLISHABLE_KEY as in the backend.
-
-
-Start the frontend development server:
-npm run dev
-
-The app will be available at http://localhost:3000.
-
-
-4. Configure Clerk
-
-Sign up at Clerk and create an application.
-Copy the Publishable Key and Secret Key from the Clerk Dashboard.
-Enable desired authentication methods (e.g., email/password, Google OAuth) in Authentication > Social Connections.
-For OAuth (optional):
-Configure the provider (e.g., Google) with Client ID and Secret.
-Add http://localhost:3000 as an authorized redirect URI.
-
-
-
-Usage
-
-Sign Up / Sign In:
-
-Open http://localhost:3000/sign-in or /sign-up.
-Use email/password or an OAuth provider (if enabled).
-The sign-in/sign-up forms are centered for a clean user experience.
-
-
-Dashboard:
-
-View activity trends, recent activities, nutrition summary, and goals.
-Interactive charts display calorie data.
-
-
-Manage Data:
-
-Log activities (/activity), nutrition (/nutrition), and goals (/goals).
-Update your profile (/profile).
-Explore exercises (/exercise).
-
-
-Toggle Theme:
-
-Switch between light and dark modes using the navbar.
-
-
-
-Project Structure
-fitness-tracker/
-├── backend/
-│   ├── routes/              # Express route handlers
-│   ├── server.js           # Main backend entry point
-│   ├── .env                # Backend environment variables
-│   └── package.json
-├── frontend/
+```
+TrueGrit/
+├── backend/            # Express API server
+│   ├── routes/         # Activity, Nutrition, Goals routes
+│   ├── models/         # MongoDB schemas
+│   └── server.js       # Main server entry
+├── frontend/           # React Vite app
 │   ├── src/
-│   │   ├── components/     # React components (Dashboard, Navbar, etc.)
-│   │   ├── lib/            # API utility (api.js)
-│   │   ├── App.jsx         # Main app component
-│   │   ├── index.jsx       # App entry point
-│   │   ├── index.css       # Global styles
-│   │   └── main.jsx        # ReactDOM setup
-│   ├── .env                # Frontend environment variables
-│   └── package.json
-└── README.md
+│   │   ├── components/ # React components
+│   │   ├── lib/        # API utilities
+│   │   └── assets/     # Styles & images
+├── public/             # Static files
+└── README.md           # You are here!
+```
 
-Troubleshooting
+## 🌐 Deployment Guide
 
-"External Account was not found":
+1. **Backend**
+   - Deploy to [Render](https://render.com) or [Railway](https://railway.app)
+   - Set environment variables:
+     ```
+     MONGO_URI=your_atlas_connection_string
+     CLERK_SECRET_KEY=sk_live_...
+     ```
 
-Verify OAuth provider setup in Clerk Dashboard.
+2. **Frontend**
+   - Deploy to [Vercel](https://vercel.com)
+   - Set environment variables:
+     ```
+     VITE_API_BASE_URL=https://your-backend-url.com
+     VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+     ```
 
-Ensure the user’s external account is linked in Users > External Accounts.
+3. **Clerk Configuration**
+   - Update production redirect URLs
+   - Switch to live API keys
 
-Disable OAuth in App.jsx to use email/password only:
-<SignIn routing="path" path="/sign-in" redirectUrl="/" signInOptions={['email']} />
+## 🤝 Contributing
 
+We welcome contributions! Please follow these steps:
 
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
+## 📜 License
 
-Authentication Errors:
+Distributed under the MIT License. See `LICENSE` for more information.
 
-Check CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY in .env files.
-Ensure VITE_API_BASE_URL matches the backend URL.
+## 📬 Contact
 
+Sneha Gupta - [GitHub](https://github.com/Snehagupta00) - snehagupta@example.com
 
-CORS Issues:
+Project Link: [https://github.com/Snehagupta00/TrueGrit](https://github.com/Snehagupta00/TrueGrit)
+```
 
-Verify CORS setup in server.js:
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+### Key Improvements:
+1. **Modern Header** - Added logo and badges for quick tech stack visibility
+2. **Visual Preview** - Space for screenshot (add an actual screenshot later)
+3. **Feature Highlights** - Emoji icons for better scanning
+4. **Tech Stack Table** - Clean, organized technology display
+5. **Simplified Setup** - Streamlined installation steps
+6. **Deployment Section** - Clear platform recommendations
+7. **Consistent Formatting** - Better spacing and organization
+8. **Mobile-Friendly** - Proper markdown structure for GitHub mobile
 
+To complete this:
+1. Add a screenshot named `screenshot.png` to your `public/` folder
+2. Update the contact email with your actual email
+3. Consider adding a demo video link if available
 
-
-
-MongoDB Connection:
-
-Ensure MONGO_URI is valid and MongoDB is running.
-
-
-
-Deployment
-
-Backend:
-
-Deploy to a platform like Heroku, Railway, or Render.
-Set environment variables (MONGO_URI, CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY) on the platform.
-Use production keys (pk_live_..., sk_live_...).
-
-
-Frontend:
-
-Deploy to Vercel, Netlify, or similar.
-Set VITE_API_BASE_URL to the deployed backend URL.
-Update VITE_CLERK_PUBLISHABLE_KEY to the live key.
-
-
-Clerk:
-
-Update callback URLs in Clerk Dashboard to match the deployed URL (e.g., https://yourdomain.com).
-Follow Clerk’s deployment guide.
-
-
-
-Contributing
-Contributions are welcome! Please follow these steps:
-
-Fork the repository.
-Create a feature branch (git checkout -b feature/your-feature).
-Commit changes (git commit -m 'Add your feature').
-Push to the branch (git push origin feature/your-feature).
-Open a pull request.
-
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
-Contact
-For questions or feedback, contact your-email@example.com or open an issue on GitHub.
+Would you like me to adjust any particular section or add more details about specific features?
