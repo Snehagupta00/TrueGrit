@@ -1,4 +1,4 @@
-Fitness Tracker-TRUEGRIT
+Fitness Tracker-(TrueGrit)
 A full-stack web application designed to help users track their fitness activities, nutrition, and goals. Built with a modern tech stack, it provides a responsive and intuitive interface for managing health and fitness data, with secure authentication powered by Clerk.
 Features
 
@@ -137,8 +137,6 @@ Switch between light and dark modes using the navbar.
 Project Structure
 fitness-tracker/
 ├── backend/
-│   ├── controllers/        # Controller functions
-│   ├── models/             # Mongoose models
 │   ├── routes/              # Express route handlers
 │   ├── server.js           # Main backend entry point
 │   ├── .env                # Backend environment variables
