@@ -3,7 +3,7 @@ import User from '../models/User.js';
 // Get or create user
 export const getOrCreateUser = async (req, res) => {
   const clerkUserId = req.auth?.userId;
-  const clerkUser = req.auth?.user; // Clerk user data
+  const clerkUser = req.auth?.user;
   if (!clerkUserId || !clerkUser) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

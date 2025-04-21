@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth, SignIn, SignUp } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/NavBar';
@@ -11,11 +11,13 @@ const ActivityLog = lazy(() => import('./components/ActivityLog'));
 const NutritionLog = lazy(() => import('./components/NutritionLog'));
 const Goals = lazy(() => import('./components/Goals'));
 const Profile = lazy(() => import('./components/Profile'));
-const ExerciseApp = lazy(() => import('./components/ExcerciseList'));
+const ExcerciseList = lazy(() => import('./components/ExcerciseList'));
 
 function App() {
   const { isLoaded, userId, isSignedIn, getToken } = useAuth();
   const [theme, setTheme] = useState('light');
+  const [isTokenSet, setIsTokenSet] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -29,15 +31,24 @@ function App() {
       if (isSignedIn && isLoaded) {
         try {
           const token = await getToken();
-          setAuthToken(token);
+          if (token) {
+            setAuthToken(token);
+            setIsTokenSet(true);
+          } else {
+            console.error('No token received from Clerk');
+            navigate('/sign-in');
+          }
         } catch (error) {
           console.error('Error setting auth token:', error);
+          navigate('/sign-in');
         }
+      } else {
+        setIsTokenSet(false);
       }
     };
     
     setupAuthToken();
-  }, [isSignedIn, isLoaded, getToken]);
+  }, [isSignedIn, isLoaded, getToken, navigate]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -54,7 +65,7 @@ function App() {
     );
   }
 
-  const isAuthenticated = isSignedIn && userId;
+  const isAuthenticated = isSignedIn && userId && isTokenSet;
 
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
@@ -121,11 +132,11 @@ function App() {
                   path="/exercise"
                   element={
                     <ProtectedRoute>
-                      <ExerciseApp />
+                      <ExcerciseList />
                     </ProtectedRoute>
                   }
                 />
-                <Route path="*" element={<Navigate to="/" />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
           </div>
@@ -135,14 +146,14 @@ function App() {
           <div className="w-full max-w-md">
             <Routes>
               <Route
-                path="/sign-in"
-                element={<SignIn routing="path" path="/sign-in" redirectUrl="/" />}
+                path="/sign-in/*"
+                element={<SignIn routing="path" path="/sign-in" afterSignInUrl="/" afterSignUpUrl="/" />}
               />
               <Route
-                path="/sign-up"
-                element={<SignUp routing="path" path="/sign-up" redirectUrl="/" />}
+                path="/sign-up/*"
+                element={<SignUp routing="path" path="/sign-up" afterSignInUrl="/" afterSignUpUrl="/" />}
               />
-              <Route path="*" element={<Navigate to="/sign-in" />} />
+              <Route path="*" element={<Navigate to="/sign-in" replace />} />
             </Routes>
           </div>
         </div>
