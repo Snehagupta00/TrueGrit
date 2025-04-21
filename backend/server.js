@@ -18,10 +18,12 @@ const app = express();
 
 app.use(clerkMiddleware());
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: '*',
   credentials: true,
 }));
 app.use(express.json());
+
+
 
 mongoose
   .connect(process.env.MONGO_URI)
