@@ -23,7 +23,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-
+app.get('/', (req, res) => {
+  res.send(`Welcome to TrurGit backend 🚀`);
+});
 
 mongoose
   .connect(process.env.MONGO_URI)
