@@ -181,7 +181,7 @@ function Navbar({ toggleTheme }) {
               </motion.div>
               {isSidebarOpen && (
                 <div className="ml-3 overflow-hidden">
-                  <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
+                  <p className="text-sm font-medium truncate" style={{ color: theme.textSecondary }}>
                     {user?.fullName || user?.username || 'User'}
                   </p>
                   <p className="text-xs truncate" style={{ color: theme.textSecondary }}>
