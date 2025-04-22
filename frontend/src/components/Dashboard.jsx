@@ -92,12 +92,12 @@ const Dashboard = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
         
-        <div className="flex space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
           {['overview', 'activities', 'nutrition', 'goals'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeTab === tab
                   ? 'bg-primary text-white'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
