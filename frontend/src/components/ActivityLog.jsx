@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
 
@@ -42,68 +42,144 @@ function ActivityLog() {
     }
   };
 
+  const inputVariants = {
+    focus: { scale: 1.02, borderColor: '#3B82F6', transition: { duration: 0.2 } },
+    blur: { scale: 1, borderColor: '#D1D5DB', transition: { duration: 0.2 } },
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 max-w-2xl mx-auto"
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4"
     >
-      <h1 className="text-2xl font-bold text-primary dark:text-primary-light mb-6">Log Activity</h1>
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg space-y-4">
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Activity Type</label>
-          <input
-            type="text"
-            value={activity.type}
-            onChange={(e) => setActivity({ ...activity, type: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., Running"
-          />
-          {errors.type && <p className="text-accent-red text-sm mt-1">{errors.type}</p>}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Duration (min)</label>
-          <input
-            type="number"
-            value={activity.duration}
-            onChange={(e) => setActivity({ ...activity, duration: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., 30"
-          />
-          {errors.duration && <p className="text-accent-red text-sm mt-1">{errors.duration}</p>}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Intensity</label>
-          <select
-            value={activity.intensity}
-            onChange={(e) => setActivity({ ...activity, intensity: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+        <h1 className="text-3xl font-bold text-primary dark:text-primary-light mb-8 text-center">
+          Log Your Activity
+        </h1>
+        <div className="space-y-6">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Activity Type
+            </label>
+            <motion.input
+              type="text"
+              value={activity.type}
+              onChange={(e) => setActivity({ ...activity, type: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., Running"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+            />
+            <AnimatePresence>
+              {errors.type && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-accent-red text-sm mt-1"
+                >
+                  {errors.type}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Duration (min)
+            </label>
+            <motion.input
+              type="number"
+              value={activity.duration}
+              onChange={(e) => setActivity({ ...activity, duration: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., 30"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+            />
+            <AnimatePresence>
+              {errors.duration && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-accent-red text-sm mt-1"
+                >
+                  {errors.duration}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Intensity
+            </label>
+            <motion.select
+              value={activity.intensity}
+              onChange={(e) => setActivity({ ...activity, intensity: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+            >
+              <option value="">Select Intensity</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </motion.select>
+            <AnimatePresence>
+              {errors.intensity && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-accent-red text-sm mt-1"
+                >
+                  {errors.intensity}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Calories Burned
+            </label>
+            <motion.input
+              type="number"
+              value={activity.calories}
+              onChange={(e) => setActivity({ ...activity, calories: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., 200"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+            />
+            <AnimatePresence>
+              {errors.calories && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-accent-red text-sm mt-1"
+                >
+                  {errors.calories}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleSubmit}
+            className="w-full bg-primary text-white p-3 rounded-lg hover:bg-primary-dark transition-colors font-medium"
           >
-            <option value="">Select</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-          {errors.intensity && <p className="text-accent-red text-sm mt-1">{errors.intensity}</p>}
+            Log Activity
+          </motion.button>
         </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Calories Burned</label>
-          <input
-            type="number"
-            value={activity.calories}
-            onChange={(e) => setActivity({ ...activity, calories: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., 200"
-          />
-          {errors.calories && <p className="text-accent-red text-sm mt-1">{errors.calories}</p>}
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-primary text-white p-2 rounded hover:bg-primary-dark transition-colors"
-        >
-          Log Activity
-        </button>
-      </form>
+      </div>
     </motion.div>
   );
 }
