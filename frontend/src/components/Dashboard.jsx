@@ -173,7 +173,7 @@ const Dashboard = () => {
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Goals Completed</p>
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {completedGoals} / {stats 건강. goals.length || 0}
+                {completedGoals} / {stats.health.goals.length || 0}
               </h3>
             </div>
             <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
