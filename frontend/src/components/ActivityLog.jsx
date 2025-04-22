@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+
 function ActivityLog() {
   const [activity, setActivity] = useState({
     type: '',
@@ -10,22 +11,26 @@ function ActivityLog() {
     calories: '',
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const validateForm = () => {
     const newErrors = {};
-    if (!activity.type) newErrors.type = 'Activity type is required';
-    if (!activity.duration || activity.duration <= 0) newErrors.duration = 'Duration must be a positive number';
+    if (!activity.type.trim()) newErrors.type = 'Activity type is required';
+    if (!activity.duration || Number(activity.duration) <= 0) newErrors.duration = 'Duration must be a positive number';
     if (!activity.intensity) newErrors.intensity = 'Intensity is required';
-    if (!activity.calories || activity.calories <= 0) newErrors.calories = 'Calories must be a positive number';
+    if (!activity.calories || Number(activity.calories) <= 0) newErrors.calories = 'Calories must be a positive number';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
     try {
       await api.post('/api/activity', {
-        type: activity.type,
+        type: activity.type.trim(),
         duration: Number(activity.duration),
         intensity: activity.intensity,
         calories: Number(activity.calories),
@@ -36,6 +41,8 @@ function ActivityLog() {
     } catch (error) {
       toast.error('Failed to log activity. Please try again.');
       console.error('Error logging activity:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -49,10 +56,10 @@ function ActivityLog() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4"
+      className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4"
     >
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-primary dark:text-primary-light mb-8 text-center">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 space-y-6">
+        <h1 className="text-3xl font-extrabold text-primary dark:text-primary mb-6 text-center">
           Log Your Activity
         </h1>
         <div className="space-y-6">
@@ -64,11 +71,12 @@ function ActivityLog() {
               type="text"
               value={activity.type}
               onChange={(e) => setActivity({ ...activity, type: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
               placeholder="e.g., Running"
               whileFocus="focus"
               initial="blur"
               variants={inputVariants}
+              aria-invalid={errors.type ? 'true' : 'false'}
             />
             <AnimatePresence>
               {errors.type && (
@@ -76,7 +84,7 @@ function ActivityLog() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-accent-red text-sm mt-1"
+                  className="text-red-500 text-sm mt-1"
                 >
                   {errors.type}
                 </motion.p>
@@ -91,11 +99,12 @@ function ActivityLog() {
               type="number"
               value={activity.duration}
               onChange={(e) => setActivity({ ...activity, duration: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
               placeholder="e.g., 30"
               whileFocus="focus"
               initial="blur"
               variants={inputVariants}
+              aria-invalid={errors.duration ? 'true' : 'false'}
             />
             <AnimatePresence>
               {errors.duration && (
@@ -103,7 +112,7 @@ function ActivityLog() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-accent-red text-sm mt-1"
+                  className="text-red-500 text-sm mt-1"
                 >
                   {errors.duration}
                 </motion.p>
@@ -117,10 +126,11 @@ function ActivityLog() {
             <motion.select
               value={activity.intensity}
               onChange={(e) => setActivity({ ...activity, intensity: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
               whileFocus="focus"
               initial="blur"
               variants={inputVariants}
+              aria-invalid={errors.intensity ? 'true' : 'false'}
             >
               <option value="">Select Intensity</option>
               <option value="low">Low</option>
@@ -133,7 +143,7 @@ function ActivityLog() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-accent-red text-sm mt-1"
+                  className="text-red-500 text-sm mt-1"
                 >
                   {errors.intensity}
                 </motion.p>
@@ -148,11 +158,12 @@ function ActivityLog() {
               type="number"
               value={activity.calories}
               onChange={(e) => setActivity({ ...activity, calories: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
               placeholder="e.g., 200"
               whileFocus="focus"
               initial="blur"
               variants={inputVariants}
+              aria-invalid={errors.calories ? 'true' : 'false'}
             />
             <AnimatePresence>
               {errors.calories && (
@@ -160,7 +171,7 @@ function ActivityLog() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-accent-red text-sm mt-1"
+                  className="text-red-500 text-sm mt-1"
                 >
                   {errors.calories}
                 </motion.p>
@@ -171,13 +182,17 @@ function ActivityLog() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSubmit}
-            className="w-full bg-primary text-white p-3 rounded-lg hover:bg-primary-dark transition-colors font-medium"
+            disabled={isSubmitting}
+            className={`w-full p-3 rounded-lg font-semibold text-white transition-colors ${
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
+            }`}
           >
-            Log Activity
+            {isSubmitting ? 'Logging...' : 'Log Activity'}
           </motion.button>
         </div>
       </div>
     </motion.div>
   );
 }
+
 export default ActivityLog;

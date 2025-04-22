@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
 
@@ -12,14 +12,15 @@ function NutritionLog() {
     fats: '',
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!nutrition.food) newErrors.food = 'Food item is required';
-    if (!nutrition.calories || nutrition.calories <= 0) newErrors.calories = 'Calories must be a positive number';
-    if (!nutrition.carbs || nutrition.carbs < 0) newErrors.carbs = 'Carbs must be a non-negative number';
-    if (!nutrition.protein || nutrition.protein < 0) newErrors.protein = 'Protein must be a non-negative number';
-    if (!nutrition.fats || nutrition.fats < 0) newErrors.fats = 'Fats must be a non-negative number';
+    if (!nutrition.food.trim()) newErrors.food = 'Food item is required';
+    if (!nutrition.calories || Number(nutrition.calories) <= 0) newErrors.calories = 'Calories must be a positive number';
+    if (nutrition.carbs === '' || Number(nutrition.carbs) < 0) newErrors.carbs = 'Carbs must be a non-negative number';
+    if (nutrition.protein === '' || Number(nutrition.protein) < 0) newErrors.protein = 'Protein must be a non-negative number';
+    if (nutrition.fats === '' || Number(nutrition.fats) < 0) newErrors.fats = 'Fats must be a non-negative number';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -28,13 +29,14 @@ function NutritionLog() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
     try {
       await api.post('/api/nutrition', {
-        food: nutrition.food,
+        food: nutrition.food.trim(),
         calories: Number(nutrition.calories),
-        carbs: Number(nutrition.carbs),
-        protein: Number(nutrition.protein),
-        fats: Number(nutrition.fats),
+        carbs: Number(nutrition.carbs) || 0,
+        protein: Number(nutrition.protein) || 0,
+        fats: Number(nutrition.fats) || 0,
       });
       toast.success('Nutrition logged successfully!');
       setNutrition({ food: '', calories: '', carbs: '', protein: '', fats: '' });
@@ -42,79 +44,181 @@ function NutritionLog() {
     } catch (error) {
       toast.error('Failed to log nutrition.');
       console.error('Error logging nutrition:', error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const inputVariants = {
+    focus: { scale: 1.02, borderColor: '#3B82F6', transition: { duration: 0.2 } },
+    blur: { scale: 1, borderColor: '#D1D5DB', transition: { duration: 0.2 } },
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 max-w-2xl mx-auto"
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-6"
     >
-      <h1 className="text-2xl font-bold text-primary dark:text-primary-light mb-6">Log Nutrition</h1>
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg space-y-4">
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Food Item</label>
-          <input
-            type="text"
-            value={nutrition.food}
-            onChange={(e) => setNutrition({ ...nutrition, food: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., Chicken Breast"
-          />
-          {errors.food && <p className="text-accent-red text-sm mt-1">{errors.food}</p>}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Calories (kcal)</label>
-          <input
-            type="number"
-            value={nutrition.calories}
-            onChange={(e) => setNutrition({ ...nutrition, calories: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., 500"
-          />
-          {errors.calories && <p className="text-accent-red text-sm mt-1">{errors.calories}</p>}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Carbs (g)</label>
-          <input
-            type="number"
-            value={nutrition.carbs}
-            onChange={(e) => setNutrition({ ...nutrition, carbs: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., 20"
-          />
-          {errors.carbs && <p className="text-accent-red text-sm mt-1">{errors.carbs}</p>}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Protein (g)</label>
-          <input
-            type="number"
-            value={nutrition.protein}
-            onChange={(e) => setNutrition({ ...nutrition, protein: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., 30"
-          />
-          {errors.protein && <p className="text-accent-red text-sm mt-1">{errors.protein}</p>}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Fats (g)</label>
-          <input
-            type="number"
-            value={nutrition.fats}
-            onChange={(e) => setNutrition({ ...nutrition, fats: e.target.value })}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            placeholder="e.g., 10"
-          />
-          {errors.fats && <p className="text-accent-red text-sm mt-1">{errors.fats}</p>}
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-primary text-white p-2 rounded hover:bg-primary-dark transition-colors"
-        >
+      <div className="max-w-lg w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 space-y-6">
+        <h1 className="text-3xl font-extrabold text-primary dark:text-primary mb-6 text-center">
           Log Nutrition
-        </button>
-      </form>
+        </h1>
+        <div className="space-y-6">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Food Item
+            </label>
+            <motion.input
+              type="text"
+              value={nutrition.food}
+              onChange={(e) => setNutrition({ ...nutrition, food: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., Chicken Breast"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+              aria-invalid={errors.food ? 'true' : 'false'}
+            />
+            <AnimatePresence>
+              {errors.food && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-red-500 text-sm mt-1"
+                >
+                  {errors.food}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Calories (kcal)
+            </label>
+            <motion.input
+              type="number"
+              value={nutrition.calories}
+              onChange={(e) => setNutrition({ ...nutrition, calories: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., 500"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+              aria-invalid={errors.calories ? 'true' : 'false'}
+            />
+            <AnimatePresence>
+              {errors.calories && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-red-500 text-sm mt-1"
+                >
+                  {errors.calories}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Carbs (g)
+            </label>
+            <motion.input
+              type="number"
+              value={nutrition.carbs}
+              onChange={(e) => setNutrition({ ...nutrition, carbs: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., 20"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+              aria-invalid={errors.carbs ? 'true' : 'false'}
+            />
+            <AnimatePresence>
+              {errors.carbs && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-red-500 text-sm mt-1"
+                >
+                  {errors.carbs}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Protein (g)
+            </label>
+            <motion.input
+              type="number"
+              value={nutrition.protein}
+              onChange={(e) => setNutrition({ ...nutrition, protein: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., 30"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+              aria-invalid={errors.protein ? 'true' : 'false'}
+            />
+            <AnimatePresence>
+              {errors.protein && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-red-500 text-sm mt-1"
+                >
+                  {errors.protein}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Fats (g)
+            </label>
+            <motion.input
+              type="number"
+              value={nutrition.fats}
+              onChange={(e) => setNutrition({ ...nutrition, fats: e.target.value })}
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              placeholder="e.g., 10"
+              whileFocus="focus"
+              initial="blur"
+              variants={inputVariants}
+              aria-invalid={errors.fats ? 'true' : 'false'}
+            />
+            <AnimatePresence>
+              {errors.fats && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-red-500 text-sm mt-1"
+                >
+                  {errors.fats}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className={`w-full p-3 rounded-lg font-semibold text-white transition-colors ${
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
+            }`}
+          >
+            {isSubmitting ? 'Logging...' : 'Log Nutrition'}
+          </motion.button>
+        </div>
+      </div>
     </motion.div>
   );
 }

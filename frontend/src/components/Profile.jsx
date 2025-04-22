@@ -31,8 +31,8 @@ function Profile() {
         if (profileRes.data) {
           setProfile(profileRes.data);
         }
-        setHistory(nutritionRes.data);
-        generateRecommendations(profileRes.data, nutritionRes.data);
+        setHistory(nutritionRes.data || []);
+        generateRecommendations(profileRes.data, nutritionRes.data || []);
       } catch (error) {
         toast.error('Failed to load profile data.');
         console.error('Error fetching data:', error);
@@ -52,7 +52,7 @@ function Profile() {
     const bmi = profileData.weight / (heightInMeters * heightInMeters);
 
     let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFats = 0;
-    if (nutritionData && nutritionData.length > 0) {
+    if (nutritionData.length > 0) {
       nutritionData.forEach((item) => {
         totalCalories += Number(item.calories || 0);
         totalProtein += Number(item.protein || 0);
@@ -158,10 +158,10 @@ function Profile() {
       workout: workoutRec,
       stats: {
         bmi: bmi.toFixed(1),
-        avgCalories: totalCalories.toFixed(0),
-        avgProtein: totalProtein.toFixed(1),
-        avgCarbs: totalCarbs.toFixed(1),
-        avgFats: totalFats.toFixed(1),
+        avgCalories: totalCalories.toFixed(0) || 'N/A',
+        avgProtein: totalProtein.toFixed(1) || 'N/A',
+        avgCarbs: totalCarbs.toFixed(1) || 'N/A',
+        avgFats: totalFats.toFixed(1) || 'N/A',
       },
     });
   };
@@ -188,7 +188,7 @@ function Profile() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400"
+        className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400"
       >
         Please sign in to view your profile
       </motion.div>
@@ -200,23 +200,23 @@ function Profile() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4"
+      className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4"
     >
       <div className="max-w-5xl mx-auto">
         {/* Profile Header */}
         <motion.div
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 flex items-center gap-6"
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 flex items-center gap-6"
         >
           <motion.img
             src={user.imageUrl || 'https://via.placeholder.com/80'}
-            alt="Profile"
-            className="w-20 h-20 rounded-full object-cover border-4 border-primary dark:border-primary-light"
+            alt={`${user.firstName} ${user.lastName}'s profile`}
+            className="w-20 h-20 rounded-full object-cover border-4 border-primary dark:border-primary shadow-sm"
             whileHover={{ scale: 1.1 }}
           />
           <div>
-            <h1 className="text-3xl font-bold text-primary dark:text-primary-light">
+            <h1 className="text-3xl font-extrabold text-primary dark:text-primary">
               {user.firstName} {user.lastName}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">{user.emailAddresses[0]?.emailAddress || 'No email provided'}</p>
@@ -228,9 +228,9 @@ function Profile() {
             <motion.div
               initial={{ x: -20 }}
               animate={{ x: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8"
             >
-              <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-6">Update Profile</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Update Profile</h2>
               <div className="space-y-6">
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Weight (kg)</label>
@@ -238,7 +238,7 @@ function Profile() {
                     type="number"
                     value={profile.weight}
                     onChange={(e) => setProfile({ ...profile, weight: e.target.value })}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
                     placeholder="Enter your weight"
                     whileFocus="focus"
                     initial="blur"
@@ -251,7 +251,7 @@ function Profile() {
                     type="number"
                     value={profile.height}
                     onChange={(e) => setProfile({ ...profile, height: e.target.value })}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
                     placeholder="Enter your height"
                     whileFocus="focus"
                     initial="blur"
@@ -263,7 +263,7 @@ function Profile() {
                   <motion.select
                     value={profile.fitnessLevel}
                     onChange={(e) => setProfile({ ...profile, fitnessLevel: e.target.value })}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
                     whileFocus="focus"
                     initial="blur"
                     variants={inputVariants}
@@ -278,7 +278,7 @@ function Profile() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSubmit}
-                  className="w-full bg-primary text-white p-3 rounded-lg hover:bg-primary-dark transition-colors font-medium"
+                  className="w-full bg-primary text-white p-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold"
                 >
                   Update Profile
                 </motion.button>
@@ -287,9 +287,9 @@ function Profile() {
             <motion.div
               initial={{ x: -20 }}
               animate={{ x: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8"
             >
-              <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-6">Nutrition History</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Nutrition History</h2>
               {loading ? (
                 <div className="flex justify-center py-4">
                   <motion.div
@@ -310,40 +310,51 @@ function Profile() {
                         transition={{ duration: 0.3 }}
                       >
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-gray-800 dark:text-gray-200">{item.food}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{item.food}</span>
                           <span className="text-gray-600 dark:text-gray-400">{item.calories} kcal</span>
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          C: {item.carbs}g • P: {item.protein}g • F: {item.fats}g
+                          C: {item.carbs || 0}g • P: {item.protein || 0}g • F: {item.fats || 0}g
                         </div>
                       </motion.li>
                     ))}
                   </ul>
                 </div>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400 italic">
-                  No nutrition data available. Start logging your meals to get personalized recommendations.
-                </p>
+                <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                  <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p>No nutrition data available. Start logging your meals to get personalized recommendations.</p>
+                </div>
               )}
             </motion.div>
           </div>
           {/* Right Column: Stats and Recommendations */}
           <div className="space-y-8">
-            {recommendations.diet && recommendations.workout ? (
+            {loading ? (
+              <div className="flex justify-center py-4">
+                <motion.div
+                  className="w-8 h-8 border-4 border-gray-300 border-t-primary rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                />
+              </div>
+            ) : recommendations.diet && recommendations.workout ? (
               <>
                 <motion.div
                   initial={{ x: 20 }}
                   animate={{ x: 0 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8"
                 >
-                  <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-6">Your Stats</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Stats</h2>
                   <div className="grid grid-cols-2 gap-4">
                     <motion.div
                       className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg"
                       whileHover={{ scale: 1.05 }}
                     >
                       <div className="text-sm text-gray-600 dark:text-gray-400">BMI</div>
-                      <div className="text-xl font-bold text-primary dark:text-primary-light">
+                      <div className="text-xl font-bold text-primary dark:text-primary">
                         {recommendations.stats.bmi}
                       </div>
                     </motion.div>
@@ -352,8 +363,8 @@ function Profile() {
                       whileHover={{ scale: 1.05 }}
                     >
                       <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Daily Calories</div>
-                      <div className="text-xl font-bold text-secondary dark:text-secondary-light">
-                        {recommendations.stats.avgCalories || 'N/A'}
+                      <div className="text-xl font-bold text-secondary dark:text-secondary">
+                        {recommendations.stats.avgCalories}
                       </div>
                     </motion.div>
                     <motion.div
@@ -361,8 +372,8 @@ function Profile() {
                       whileHover={{ scale: 1.05 }}
                     >
                       <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Protein</div>
-                      <div className="text-xl font-bold text-primary dark:text-primary-light">
-                        {recommendations.stats.avgProtein || 'N/A'}g
+                      <div className="text-xl font-bold text-primary dark:text-primary">
+                        {recommendations.stats.avgProtein}g
                       </div>
                     </motion.div>
                     <motion.div
@@ -370,8 +381,8 @@ function Profile() {
                       whileHover={{ scale: 1.05 }}
                     >
                       <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Carbs</div>
-                      <div className="text-xl font-bold text-primary dark:text-primary-light">
-                        {recommendations.stats.avgCarbs || 'N/A'}g
+                      <div className="text-xl font-bold text-primary dark:text-primary">
+                        {recommendations.stats.avgCarbs}g
                       </div>
                     </motion.div>
                   </div>
@@ -379,26 +390,26 @@ function Profile() {
                 <motion.div
                   initial={{ x: 20 }}
                   animate={{ x: 0 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8"
                 >
-                  <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                     <span className="text-secondary mr-2">●</span>Personalized Diet Recommendations
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Goal</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Goal</h3>
                       <p className="text-gray-600 dark:text-gray-300">{recommendations.diet.goal}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Calories</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Calories</h3>
                       <p className="text-gray-600 dark:text-gray-300">{recommendations.diet.calories}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Macronutrient Focus</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Macronutrient Focus</h3>
                       <p className="text-gray-600 dark:text-gray-300">{recommendations.diet.macros}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Suggested Foods</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Suggested Foods</h3>
                       <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-600 dark:text-gray-300">
                         {recommendations.diet.suggestions.map((item, index) => (
                           <li key={index}>{item}</li>
@@ -410,26 +421,26 @@ function Profile() {
                 <motion.div
                   initial={{ x: 20 }}
                   animate={{ x: 0 }}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8"
                 >
-                  <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                     <span className="text-primary mr-2">●</span>Personalized Workout Recommendations
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Frequency</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Frequency</h3>
                       <p className="text-gray-600 dark:text-gray-300">{recommendations.workout.frequency}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Intensity</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Intensity</h3>
                       <p className="text-gray-600 dark:text-gray-300">{recommendations.workout.intensity}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Focus</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Focus</h3>
                       <p className="text-gray-600 dark:text-gray-300">{recommendations.workout.focus}</p>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">Suggested Activities</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Suggested Activities</h3>
                       <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-600 dark:text-gray-300">
                         {recommendations.workout.suggestions.map((item, index) => (
                           <li key={index}>{item}</li>
@@ -443,14 +454,14 @@ function Profile() {
               <motion.div
                 initial={{ x: 20 }}
                 animate={{ x: 0 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8"
               >
-                <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-6">Recommendations</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recommendations</h2>
                 <p className="text-gray-500 dark:text-gray-400 mb-4">
                   Complete your profile information to receive personalized diet and workout recommendations based on your data.
                 </p>
                 <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
-                  <h3 className="font-medium text-primary dark:text-primary-light mb-2">Getting Started</h3>
+                  <h3 className="font-medium text-primary dark:text-primary mb-2">Getting Started</h3>
                   <ol className="list-decimal pl-5 space-y-1 text-gray-700 dark:text-gray-300">
                     <li>Enter your weight and height</li>
                     <li>Select your fitness level</li>
@@ -465,4 +476,5 @@ function Profile() {
     </motion.div>
   );
 }
+
 export default Profile;
