@@ -133,8 +133,8 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto pt-8">
+    <div className="min-h-screen max-w-7xl bg-gray-50 dark:bg-gray-900 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto pt-8">
         {/* Mobile Tab Navigation for smaller screens */}
         <div className="md:hidden mb-6 overflow-x-auto">
           <div className="flex space-x-2 pb-2">
