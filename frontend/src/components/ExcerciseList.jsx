@@ -147,39 +147,44 @@ function ExerciseApp() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-6 lg:p-12 max-w-7xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen"
+      className="relative flex flex-col h-screen overflow-hidden bg-gray-50 dark:bg-gray-900"
     >
-      <header className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold text-primary dark:text-primary mb-4">
-          Workout Exercise Tracker
+      <header className="sticky top-0 z-10 px-6 py-8 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+          Workout Exercises
         </h1>
-        <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-          Customize your workout routine with our curated exercises.
+        <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto text-center">
+          Explore and track your favorite exercises.
         </p>
-      </header>
-      <div className="flex justify-center mb-10">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-3 inline-flex space-x-3">
-          {['all', 'strength', 'cardio', 'core'].map((category) => (
-            <button
-              key={category}
-              className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 ${
-                selectedCategory === category
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-              onClick={() => setSelectedCategory(category)}
-              aria-current={selectedCategory === category ? 'true' : 'false'}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </button>
-          ))}
+        <div className="mt-8 flex justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 inline-flex space-x-2 overflow-x-auto max-w-full scrollbar-hide">
+            {['all', 'strength', 'cardio', 'core'].map((category) => (
+              <button
+                key={category}
+                className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 whitespace-nowrap ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white dark:bg-blue-500 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedCategory(category)}
+                aria-current={selectedCategory === category ? 'true' : 'false'}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredExercises.map((exercise) => (
-          <ExerciseCard key={exercise.id} exercise={exercise} />
-        ))}
-      </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto px-6 pb-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
+            {filteredExercises.map((exercise) => (
+              <ExerciseCard key={exercise.id} exercise={exercise} />
+            ))}
+          </div>
+        </div>
+      </main>
     </motion.div>
   );
 }
@@ -215,11 +220,11 @@ function ExerciseCard({ exercise }) {
 
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
       whileHover={{ scale: 1.02 }}
     >
-      <div className="relative h-56 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-        <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="relative h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+        <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
         <p className="absolute bottom-4 text-sm text-gray-600 dark:text-gray-300">{exercise.name}</p>
@@ -230,10 +235,10 @@ function ExerciseCard({ exercise }) {
           <span
             className={`px-3 py-1 text-xs rounded-full font-semibold ${
               exercise.category === 'strength'
-                ? 'bg-blue-100 text-blue-800'
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                 : exercise.category === 'cardio'
-                ? 'bg-red-100 text-red-800'
-                : 'bg-green-100 text-green-800'
+                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
             }`}
           >
             {exercise.category.charAt(0).toUpperCase() + exercise.category.slice(1)}
@@ -241,20 +246,20 @@ function ExerciseCard({ exercise }) {
         </div>
         <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">{exercise.description}</p>
         <div className="mb-4 flex items-center">
-          <span className="text-gray-700 dark:text-gray-300 font-medium mr-3">Duration:</span>
+          <span className="text-gray-900 dark:text-white font-medium mr-3">Duration:</span>
           <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
             <button
-              className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+              className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center hover:bg-blue-600 transition-colors"
               onClick={() => setCustomTime(Math.max(15, customTime - 15))}
               aria-label="Decrease duration"
             >
               -
             </button>
-            <div className="px-4 py-1 text-gray-900 dark:text-gray-100 font-semibold">
+            <div className="px-4 py-1 text-gray-900 dark:text-white font-semibold">
               {formatTime(customTime)}
             </div>
             <button
-              className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+              className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center hover:bg-blue-600 transition-colors"
               onClick={() => setCustomTime(customTime + 15)}
               aria-label="Increase duration"
             >
@@ -266,7 +271,7 @@ function ExerciseCard({ exercise }) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex-1 py-3 px-5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-semibold"
+            className="flex-1 py-3 px-5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold dark:bg-blue-500 dark:hover:bg-blue-600"
             onClick={() => setExpanded(!expanded)}
             aria-expanded={expanded}
           >
@@ -276,7 +281,7 @@ function ExerciseCard({ exercise }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={`flex-1 py-3 px-5 text-white rounded-lg transition-all font-semibold ${
-              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-secondary hover:bg-secondary-dark'
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600'
             }`}
             onClick={handleStart}
             disabled={isSubmitting}
@@ -292,7 +297,7 @@ function ExerciseCard({ exercise }) {
             className="mt-5 border-t border-gray-200 dark:border-gray-700 pt-4"
           >
             <h4 className="font-semibold text-gray-900 dark:text-white mb-3">How to perform:</h4>
-            <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300 text-sm">
+            <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-300 text-sm">
               {exercise.steps.map((step, index) => (
                 <li key={index} className="mb-2">{step}</li>
               ))}

@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 const baseURL = import.meta.env.PROD
   ? import.meta.env.VITE_API_BASE_URL
-  : '/api';
+ : import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL,

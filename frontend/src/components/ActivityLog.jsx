@@ -47,31 +47,31 @@ function ActivityLog() {
   };
 
   const inputVariants = {
-    focus: { scale: 1.02, borderColor: '#3B82F6', transition: { duration: 0.2 } },
-    blur: { scale: 1, borderColor: '#D1D5DB', transition: { duration: 0.2 } },
+    focus: { scale: 1.02, borderColor: '#4A5568', transition: { duration: 0.2 } },
+    blur: { scale: 1, borderColor: '#CBD5E0', transition: { duration: 0.2 } },
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4"
+      className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 sm:px-6 lg:px-8"
     >
       <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 space-y-6">
-        <h1 className="text-3xl font-extrabold text-primary dark:text-primary mb-6 text-center">
-          Log Your Activity
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          Log Activity
         </h1>
         <div className="space-y-6">
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
               Activity Type
             </label>
             <motion.input
               type="text"
               value={activity.type}
               onChange={(e) => setActivity({ ...activity, type: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white transition-colors"
               placeholder="e.g., Running"
               whileFocus="focus"
               initial="blur"
@@ -92,14 +92,14 @@ function ActivityLog() {
             </AnimatePresence>
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
               Duration (min)
             </label>
             <motion.input
               type="number"
               value={activity.duration}
               onChange={(e) => setActivity({ ...activity, duration: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white transition-colors"
               placeholder="e.g., 30"
               whileFocus="focus"
               initial="blur"
@@ -120,13 +120,13 @@ function ActivityLog() {
             </AnimatePresence>
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
               Intensity
             </label>
             <motion.select
               value={activity.intensity}
               onChange={(e) => setActivity({ ...activity, intensity: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white transition-colors"
               whileFocus="focus"
               initial="blur"
               variants={inputVariants}
@@ -151,14 +151,14 @@ function ActivityLog() {
             </AnimatePresence>
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
               Calories Burned
             </label>
             <motion.input
               type="number"
               value={activity.calories}
               onChange={(e) => setActivity({ ...activity, calories: e.target.value })}
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white transition-colors"
               placeholder="e.g., 200"
               whileFocus="focus"
               initial="blur"
@@ -184,7 +184,7 @@ function ActivityLog() {
             onClick={handleSubmit}
             disabled={isSubmitting}
             className={`w-full p-3 rounded-lg font-semibold text-white transition-colors ${
-              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
             }`}
           >
             {isSubmitting ? 'Logging...' : 'Log Activity'}
