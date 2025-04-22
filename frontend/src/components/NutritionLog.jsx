@@ -65,7 +65,7 @@ function NutritionLog() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
           Log Nutrition
         </h1>
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
               Food Item
@@ -207,9 +207,9 @@ function NutritionLog() {
             </AnimatePresence>
           </div>
           <motion.button
+            type="submit"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleSubmit}
             disabled={isSubmitting}
             className={`w-full p-3 rounded-lg font-semibold text-white transition-colors ${
               isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
@@ -217,7 +217,7 @@ function NutritionLog() {
           >
             {isSubmitting ? 'Logging...' : 'Log Nutrition'}
           </motion.button>
-        </div>
+        </form>
       </div>
     </motion.div>
   );
