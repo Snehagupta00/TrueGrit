@@ -5,7 +5,6 @@ import api from '../lib/api';
 
 function ExerciseApp() {
   const [selectedCategory, setSelectedCategory] = useState('all');
-
   const exercises = [
     {
       id: 1,
@@ -158,11 +157,9 @@ function ExerciseApp() {
       ]
     }
   ];
-
   const filteredExercises = selectedCategory === 'all'
     ? exercises
     : exercises.filter((exercise) => exercise.category === selectedCategory);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -202,7 +199,6 @@ function ExerciseApp() {
     </motion.div>
   );
 }
-
 function ExerciseCard({ exercise }) {
   const [expanded, setExpanded] = useState(false);
   const [customTime, setCustomTime] = useState(exercise.defaultTime);
@@ -213,7 +209,6 @@ function ExerciseCard({ exercise }) {
     const seconds = timeInSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   };
-
   const handleStart = async () => {
     try {
       await api.post('/api/activity', {
@@ -228,7 +223,6 @@ function ExerciseCard({ exercise }) {
       console.error('Error logging exercise:', error);
     }
   };
-
   return (
     <motion.div
       className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
@@ -327,5 +321,4 @@ function ExerciseCard({ exercise }) {
     </motion.div>
   );
 }
-
 export default ExerciseApp;

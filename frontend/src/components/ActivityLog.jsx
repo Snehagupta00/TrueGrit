@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
-
 function ActivityLog() {
   const [activity, setActivity] = useState({
     type: '',
@@ -11,7 +10,6 @@ function ActivityLog() {
     calories: '',
   });
   const [errors, setErrors] = useState({});
-
   const validateForm = () => {
     const newErrors = {};
     if (!activity.type) newErrors.type = 'Activity type is required';
@@ -21,7 +19,6 @@ function ActivityLog() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -183,5 +180,4 @@ function ActivityLog() {
     </motion.div>
   );
 }
-
 export default ActivityLog;

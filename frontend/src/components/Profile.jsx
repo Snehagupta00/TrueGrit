@@ -222,7 +222,6 @@ function Profile() {
             <p className="text-gray-600 dark:text-gray-400">{user.emailAddresses[0]?.emailAddress || 'No email provided'}</p>
           </div>
         </motion.div>
-
         <div className="grid gap-8 md:grid-cols-2">
           {/* Left Column: Profile Form and Nutrition History */}
           <div className="space-y-8">
@@ -285,7 +284,6 @@ function Profile() {
                 </motion.button>
               </div>
             </motion.div>
-
             <motion.div
               initial={{ x: -20 }}
               animate={{ x: 0 }}
@@ -329,7 +327,6 @@ function Profile() {
               )}
             </motion.div>
           </div>
-
           {/* Right Column: Stats and Recommendations */}
           <div className="space-y-8">
             {recommendations.diet && recommendations.workout ? (
@@ -379,7 +376,6 @@ function Profile() {
                     </motion.div>
                   </div>
                 </motion.div>
-
                 <motion.div
                   initial={{ x: 20 }}
                   animate={{ x: 0 }}
@@ -411,7 +407,6 @@ function Profile() {
                     </div>
                   </div>
                 </motion.div>
-
                 <motion.div
                   initial={{ x: 20 }}
                   animate={{ x: 0 }}
@@ -470,5 +465,4 @@ function Profile() {
     </motion.div>
   );
 }
-
 export default Profile;

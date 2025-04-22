@@ -4,7 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import api, { setAuthToken } from '../lib/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '@clerk/clerk-react';
-
 const Dashboard = () => {
   const [stats, setStats] = useState({
     activities: [],
@@ -14,7 +13,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const { getToken } = useAuth();
-
   useEffect(() => {
     const setupToken = async () => {
       try {
@@ -108,7 +106,6 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <motion.div 
@@ -188,7 +185,6 @@ const Dashboard = () => {
           </div>
         </motion.div>
       </div>
-
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Activities Section */}
@@ -244,7 +240,6 @@ const Dashboard = () => {
             </div>
           )}
         </motion.div>
-
         {/* Recent Activities */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -288,7 +283,6 @@ const Dashboard = () => {
           )}
         </motion.div>
       </div>
-
       {/* Nutrition and Goals */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Nutrition */}
@@ -336,7 +330,6 @@ const Dashboard = () => {
             </div>
           )}
         </motion.div>
-
         {/* Goals */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -393,5 +386,4 @@ const Dashboard = () => {
     </motion.div>
   );
 };
-
 export default Dashboard;
