@@ -25,7 +25,6 @@ function App() {
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
   }, []);
 
-  // Set the auth token when the user signs in
   useEffect(() => {
     const setupAuthToken = async () => {
       if (isSignedIn && isLoaded) {
@@ -46,7 +45,7 @@ function App() {
         setIsTokenSet(false);
       }
     };
-    
+
     setupAuthToken();
   }, [isSignedIn, isLoaded, getToken, navigate]);
 
@@ -68,18 +67,15 @@ function App() {
   const isAuthenticated = isSignedIn && userId && isTokenSet;
 
   const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/sign-in" />;
-    }
-    return children;
+    return isAuthenticated ? children : <Navigate to="/sign-in" replace />;
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
       {isAuthenticated ? (
-        <div className="pb-16 md:pb-0 md:ml-64">
+        <>
           <Navbar toggleTheme={toggleTheme} theme={theme} />
-          <div className="pt-2 px-4 max-w-6xl mx-auto">
+          <main className="pt-4 px-4 max-w-6xl mx-auto">
             <Suspense
               fallback={
                 <div className="flex items-center justify-center h-screen">
@@ -139,19 +135,33 @@ function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
-          </div>
-        </div>
+          </main>
+        </>
       ) : (
         <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
           <div className="w-full max-w-md">
             <Routes>
               <Route
                 path="/sign-in/*"
-                element={<SignIn routing="path" path="/sign-in" afterSignInUrl="/" afterSignUpUrl="/" />}
+                element={
+                  <SignIn
+                    routing="path"
+                    path="/sign-in"
+                    afterSignInUrl="/"
+                    afterSignUpUrl="/"
+                  />
+                }
               />
               <Route
                 path="/sign-up/*"
-                element={<SignUp routing="path" path="/sign-up" afterSignInUrl="/" afterSignUpUrl="/" />}
+                element={
+                  <SignUp
+                    routing="path"
+                    path="/sign-up"
+                    afterSignInUrl="/"
+                    afterSignUpUrl="/"
+                  />
+                }
               />
               <Route path="*" element={<Navigate to="/sign-in" replace />} />
             </Routes>

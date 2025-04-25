@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import api, { setAuthToken } from '../lib/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '@clerk/clerk-react';
+import { motion } from 'framer-motion';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -14,7 +15,6 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { getToken } = useAuth();
 
-  // Centralized theme object for consistent colors
   const theme = {
     primary: '#4F46E5',
     secondary: '#FFFFFF',
@@ -30,6 +30,10 @@ const Dashboard = () => {
     border: '#E5E7EB',
     success: '#10B981',
     successLight: '#D1FAE5',
+    warning: '#F59E0B',
+    warningLight: '#FEF3C7',
+    danger: '#EF4444',
+    dangerLight: '#FEE2E2',
   };
 
   useEffect(() => {
@@ -88,24 +92,57 @@ const Dashboard = () => {
     );
   }
 
+  // Process data for charts
   const chartData = (stats.activities || []).map((activity, index) => ({
     name: `Day ${index + 1}`,
     calories: activity.caloriesBurned || 0,
+    duration: activity.duration || 0,
   }));
 
-  const totalCaloriesBurned = stats.activities.reduce((sum, activity) => sum + (activity.caloriesBurned || 0), 0);
+  const exerciseTypes = [...new Set(stats.activities.map(a => a.type))];
+  const exerciseData = exerciseTypes.map(type => ({
+    name: type,
+    value: stats.activities.filter(a => a.type === type).reduce((sum, a) => sum + (a.duration || 0), 0),
+  }));
+
+  const totalCaloriesBurned = stats.activities.reduce((sum, activity) => sum + (activity.calories || 0), 0);
   const totalCaloriesConsumed = stats.nutrition.reduce((sum, item) => sum + (item.calories || 0), 0);
   const completedGoals = stats.goals.filter(goal => goal.completed).length;
+  const totalExerciseMinutes = stats.activities.reduce((sum, activity) => sum + (activity.duration || 0), 0);
   
   // Define stat cards data
   const statCards = [
     {
       title: 'Calories Burned',
       value: totalCaloriesBurned,
+      unit: 'kcal',
       max: 5000,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Exercise Time',
+      value: totalExerciseMinutes,
+      unit: 'mins',
+      max: 300,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Goals Completed',
+      value: completedGoals,
+      unit: `/${stats.goals.length || 0}`,
+      max: stats.goals.length || 1,
+      progress: stats.goals.length ? (completedGoals / stats.goals.length * 100) : 0,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
     },
@@ -119,60 +156,44 @@ const Dashboard = () => {
         </svg>
       ),
     },
-    {
-      title: 'Goals Completed',
-      value: `${completedGoals} / ${stats.goals.length || 0}`,
-      max: 100,
-      progress: stats.goals.length ? (completedGoals / stats.goals.length * 100) : 0,
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
   ];
 
+  const COLORS = ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#C7D2FE'];
+
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto pt-8">
-        {/* Mobile Tab Navigation for smaller screens */}
-        <div className="md:hidden mb-6 overflow-x-auto">
-          <div className="flex space-x-2 pb-2">
-            {['overview', 'activity', 'nutrition', 'goals'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeTab === tab
-                    ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }`}
-                style={{
-                  backgroundColor: activeTab === tab ? theme.accentLight : theme.lightSurface,
-                  color: activeTab === tab ? theme.primary : theme.textSecondary
-                }}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Track your fitness progress and achievements</p>
+        </motion.div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           {statCards.map((card, index) => (
-            <div
+            <motion.div
               key={index}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="p-4 sm:p-6">
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">{card.title}</p>
-                    <h3 className="text-xl sm:text-2xl font-bold mt-1" style={{ color: theme.primary }}>{card.value}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{card.title}</p>
+                    <h3 className="text-2xl font-bold mt-1" style={{ color: theme.primary }}>
+                      {card.value} <span className="text-lg text-gray-500 dark:text-gray-400">{card.unit}</span>
+                    </h3>
                   </div>
                   <div 
-                    className="p-2 sm:p-3 rounded-full" 
+                    className="p-3 rounded-full" 
                     style={{ 
                       backgroundColor: theme.accentLight,
                       color: theme.primary
@@ -193,30 +214,36 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Main content area - responsive grid layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Chart */}
-          <div 
-            className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow transition-all duration-300 hover:shadow-md"
-          >
-            <div className="p-4 sm:p-6">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-semibold" style={{ color: theme.primary }}>Activity Trends</h2>
-                <button 
-                  className="text-sm font-medium"
-                  style={{ color: theme.accent }}
-                >
-                  View All
-                </button>
+        {/* Main content area */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Activity Chart */}
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Activity Overview</h2>
+                <div className="flex space-x-2">
+                  <button 
+                    className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'calories' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
+                    onClick={() => setActiveTab('calories')}
+                  >
+                    Calories
+                  </button>
+                  <button 
+                    className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'duration' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
+                    onClick={() => setActiveTab('duration')}
+                  >
+                    Duration
+                  </button>
+                </div>
               </div>
-              {chartData.length > 0 ? (
-                <div className="h-60 sm:h-72">
+              <div className="h-64">
+                {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                    <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" strokeOpacity={0.3} />
                       <XAxis
                         dataKey="name"
@@ -239,63 +266,110 @@ const Dashboard = () => {
                         }}
                         cursor={{ fill: theme.accentLight, opacity: 0.3 }}
                       />
-                      <Bar dataKey="calories" radius={[8, 8, 0, 0]}>
-                        {chartData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={theme.primary}
-                            fillOpacity={0.6 + (index * 0.05)}
-                          />
-                        ))}
-                      </Bar>
+                      <Bar 
+                        dataKey={activeTab === 'calories' ? 'calories' : 'duration'} 
+                        radius={[4, 4, 0, 0]}
+                        fill={theme.primary}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12">
-                  <svg 
-                    className="w-12 h-12 sm:w-16 sm:h-16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                    style={{ color: theme.accent }}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">No activity data available</p>
-                </div>
-              )}
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <svg 
+                      className="w-16 h-16" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                      style={{ color: theme.accent }}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <p className="mt-4 text-gray-500 dark:text-gray-400">No activity data available</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* Exercise Distribution */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Exercise Distribution</h2>
+              <div className="h-64">
+                {exerciseData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={exerciseData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {exerciseData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Legend />
+                      <Tooltip
+                        contentStyle={{
+                          background: theme.darkSurface,
+                          borderColor: 'transparent',
+                          borderRadius: '0.5rem',
+                          color: theme.secondary,
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <svg 
+                      className="w-16 h-16" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                      style={{ color: theme.accent }}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                    </svg>
+                    <p className="mt-4 text-gray-500 dark:text-gray-400">No exercise data available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activities and Nutrition */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           {/* Recent Activities */}
-          <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow transition-all duration-300 hover:shadow-md"
-          >
-            <div className="p-4 sm:p-6">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-semibold" style={{ color: theme.primary }}>Recent Activities</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Exercises</h2>
                 <button 
-                  className="text-sm font-medium"
-                  style={{ color: theme.accent }}
+                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
                   View All
                 </button>
               </div>
               {stats.activities && stats.activities.length > 0 ? (
-                <ul className="space-y-3 sm:space-y-4">
+                <div className="space-y-4">
                   {stats.activities.slice(0, 5).map((activity, index) => (
-                    <li
+                    <div
                       key={activity._id || index}
-                      className="flex items-start p-2 sm:p-3 rounded-lg transition-all duration-300 hover:translate-x-1"
-                      style={{ backgroundColor: index % 2 === 0 ? 'transparent' : (theme.accentLight + '40') }}
+                      className="flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       <div 
-                        className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center"
+                        className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: theme.accentLight }}
                       >
                         <svg 
-                          className="h-4 w-4 sm:h-5 sm:w-5" 
+                          className="h-5 w-5" 
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -304,21 +378,30 @@ const Dashboard = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                       </div>
-                      <div className="ml-3">
-                        <p className="font-medium text-sm sm:text-base" style={{ color: theme.text }}>
-                          {activity.type}
-                        </p>
-                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                          {activity.caloriesBurned} kcal • {activity.duration || 'N/A'} mins
-                        </p>
+                      <div className="ml-4 flex-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium text-gray-900 dark:text-white">{activity.type}</h3>
+                          <span className="text-sm font-semibold" style={{ color: theme.primary }}>
+                            {activity.duration || 'N/A'} mins
+                          </span>
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {new Date(activity.date || Date.now()).toLocaleDateString()}
+                          </p>
+                          <p className="text-sm font-medium">
+                            <span className="text-gray-500 dark:text-gray-400">Calories: </span>
+                            <span style={{ color: theme.success }}>{activity.caloriesBurned || 0}</span>
+                          </p>
+                        </div>
                       </div>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+                <div className="flex flex-col items-center justify-center py-8">
                   <svg 
-                    className="w-12 h-12 sm:w-16 sm:h-16" 
+                    className="w-16 h-16" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -326,58 +409,67 @@ const Dashboard = () => {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">No recent activities</p>
+                  <p className="mt-4 text-gray-500 dark:text-gray-400">No recent exercises</p>
                 </div>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Nutrition and Goals */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
-          {/* Nutrition Table */}
-          <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden transition-all duration-300 hover:shadow-md"
-          >
-            <div className="p-4 sm:p-6">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-semibold" style={{ color: theme.primary }}>Recent Nutrition</h2>
+          {/* Recent Nutrition */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Nutrition</h2>
                 <button 
-                  className="text-sm font-medium"
-                  style={{ color: theme.accent }}
+                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
                   View All
                 </button>
               </div>
               {stats.nutrition && stats.nutrition.length > 0 ? (
-                <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
-                  <table className="min-w-full">
-                    <thead>
-                      <tr>
-                        <th className="py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Food</th>
-                        <th className="py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Calories</th>
-                        <th className="py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {stats.nutrition.slice(0, 5).map((item, index) => (
-                        <tr
-                          key={item._id || index}
-                          className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
-                          style={{ backgroundColor: index % 2 === 0 ? 'transparent' : (theme.accentLight + '20') }}
+                <div className="space-y-4">
+                  {stats.nutrition.slice(0, 5).map((item, index) => (
+                    <div
+                      key={item._id || index}
+                      className="flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <div 
+                        className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: theme.successLight }}
+                      >
+                        <svg 
+                          className="h-5 w-5" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                          style={{ color: theme.success }}
                         >
-                          <td className="py-3 text-xs sm:text-sm font-medium" style={{ color: theme.text }}>{item.food}</td>
-                          <td className="py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">{item.calories} kcal</td>
-                          <td className="py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">{item.time || 'N/A'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium text-gray-900 dark:text-white">{item.food}</h3>
+                          <span className="text-sm font-semibold" style={{ color: theme.success }}>
+                            {item.calories || 0} kcal
+                          </span>
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {item.time || 'No time specified'}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {item.mealType || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+                <div className="flex flex-col items-center justify-center py-8">
                   <svg 
-                    className="w-12 h-12 sm:w-16 sm:h-16" 
+                    className="w-16 h-16" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -390,80 +482,80 @@ const Dashboard = () => {
               )}
             </div>
           </div>
+        </div>
 
-          {/* Goals */}
-          <div
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow transition-all duration-300 hover:shadow-md"
-          >
-            <div className="p-4 sm:p-6">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-semibold" style={{ color: theme.primary }}>Your Goals</h2>
-                <button 
-                  className="text-sm font-medium"
-                  style={{ color: theme.accent }}
-                >
-                  View All
-                </button>
-              </div>
-              {stats.goals && stats.goals.length > 0 ? (
-                <ul className="space-y-3 sm:space-y-4">
-                  {stats.goals.slice(0, 5).map((goal, index) => (
-                    <li
-                      key={goal._id || index}
-                      className="p-3 sm:p-4 rounded-xl transition-all duration-300 hover:translate-x-1 flex items-center"
-                      style={{ backgroundColor: theme.accentLight + '40' }}
-                    >
+        {/* Goals Section */}
+        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Goals</h2>
+              <button 
+                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              >
+                View All
+              </button>
+            </div>
+            {stats.goals && stats.goals.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {stats.goals.slice(0, 3).map((goal, index) => (
+                  <div
+                    key={goal._id || index}
+                    className="p-4 rounded-xl transition-all duration-300 hover:shadow-md"
+                    style={{ 
+                      backgroundColor: goal.completed ? theme.successLight : theme.accentLight,
+                      borderLeft: `4px solid ${goal.completed ? theme.success : theme.primary}`
+                    }}
+                  >
+                    <div className="flex items-start">
                       <div 
-                        className={`flex-shrink-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center ${
+                        className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center mt-1 ${
                           goal.completed ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
                         }`}
-                        style={{ backgroundColor: goal.completed ? theme.success : '#CBD5E1' }}
                       >
                         {goal.completed && (
-                          <svg className="h-2 w-2 sm:h-3 sm:w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                         )}
                       </div>
-                      <div className="ml-3 flex-1">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                          <p className={`text-xs sm:text-sm font-medium ${
-                            goal.completed ? 'text-gray-500 dark:text-gray-400 line-through' : 'text-gray-900 dark:text-white'
-                          }`}>
-                            {goal.type}: {goal.target}
-                          </p>
-                          <span 
-                            className="text-xs px-2 py-1 rounded-full mt-1 sm:mt-0 inline-block"
-                            style={{ 
-                              backgroundColor: goal.completed ? theme.successLight : theme.accentLight,
-                              color: goal.completed ? theme.success : theme.primary
-                            }}
-                          >
-                            {goal.completed ? 'Completed' : 'In Progress'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {goal.deadline ? `Due: ${new Date(goal.deadline).toLocaleDateString()}` : 'No deadline'}
+                      <div className="ml-3">
+                        <h3 className={`font-medium ${
+                          goal.completed ? 'text-gray-600 dark:text-gray-300 line-through' : 'text-gray-900 dark:text-white'
+                        }`}>
+                          {goal.type}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Target: {goal.target}
                         </p>
+                        {goal.deadline && (
+                          <p className="text-xs mt-2">
+                            <span className="text-gray-500 dark:text-gray-400">Due: </span>
+                            <span className={`font-medium ${
+                              new Date(goal.deadline) < new Date() && !goal.completed ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'
+                            }`}>
+                              {new Date(goal.deadline).toLocaleDateString()}
+                            </span>
+                          </p>
+                        )}
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12">
-                  <svg 
-                    className="w-12 h-12 sm:w-16 sm:h-16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                    style={{ color: theme.accent }}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">No goals set</p>
-                </div>
-              )}
-            </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <svg 
+                  className="w-16 h-16" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  style={{ color: theme.accent }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="mt-4 text-gray-500 dark:text-gray-400">No goals set</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

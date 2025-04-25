@@ -1,9 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const baseURL = import.meta.env.PROD
-  ? import.meta.env.VITE_API_BASE_URL
- : import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 const api = axios.create({
   baseURL,
@@ -42,10 +40,11 @@ api.interceptors.response.use(
     if (response) {
       switch (response.status) {
         case 401:
-          toast.error('Session expired. Please sign in again.');
+          toast.error('Session expired. Redirecting to sign-in...');
+          setAuthToken(null); // optional
           setTimeout(() => {
             window.location.href = '/sign-in';
-          }, 1500);
+          }, 2000);
           break;
         case 403:
           toast.error('You don\'t have permission for this action.');
