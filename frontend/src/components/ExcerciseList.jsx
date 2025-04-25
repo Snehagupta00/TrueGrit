@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
 import { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -214,7 +218,7 @@ function ExerciseCard({ exercise }) {
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = timeInSeconds % 60;
-    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    return ${minutes}:${seconds < 10 ? '0' + seconds : seconds};
   };
 
   const handleStart = async () => {
@@ -231,7 +235,11 @@ function ExerciseCard({ exercise }) {
         intensity: 'medium',
         calories: Math.round((customTime / 60) * 100),
       });
+<<<<<<< HEAD
       toast.success(`${exercise.name} logged for ${formatTime(customTime)}!`);
+=======
+      toast.success(${exercise.name} logged for ${formatTime(customTime)}!);
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
       setIsActive(true);
       setTimeLeft(customTime);
     } catch (error) {
@@ -250,7 +258,11 @@ function ExerciseCard({ exercise }) {
       }, 1000);
     } else if (timeLeft === 0 && isActive) {
       setIsActive(false);
+<<<<<<< HEAD
       toast.success(`Time's up! Great job with ${exercise.name}!`);
+=======
+      toast.success(Time's up! Great job with ${exercise.name}!);
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
     }
     return () => clearInterval(interval);
   }, [isActive, timeLeft, exercise.name]);
@@ -278,7 +290,11 @@ function ExerciseCard({ exercise }) {
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700">
           <div 
             className="h-full bg-blue-500 transition-all duration-1000 ease-linear"
+<<<<<<< HEAD
             style={{ width: `${progress}%` }}
+=======
+            style={{ width: ${progress}% }}
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
           ></div>
         </div>
       </div>

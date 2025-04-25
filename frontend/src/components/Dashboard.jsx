@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import api, { setAuthToken } from '../lib/api';
@@ -94,7 +95,7 @@ const Dashboard = () => {
 
   // Process data for charts
   const chartData = (stats.activities || []).map((activity, index) => ({
-    name: `Day ${index + 1}`,
+    name: Day ${index + 1},
     calories: activity.caloriesBurned || 0,
     duration: activity.duration || 0,
   }));
@@ -137,7 +138,11 @@ const Dashboard = () => {
     {
       title: 'Goals Completed',
       value: completedGoals,
+<<<<<<< HEAD
       unit: `/${stats.goals.length || 0}`,
+=======
+      unit: /${stats.goals.length || 0},
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
       max: stats.goals.length || 1,
       progress: stats.goals.length ? (completedGoals / stats.goals.length * 100) : 0,
       icon: (
@@ -208,7 +213,7 @@ const Dashboard = () => {
                       className="h-2 rounded-full transition-all duration-500"
                       style={{
                         backgroundColor: theme.primary,
-                        width: `${card.progress !== undefined ? card.progress : Math.min(100, (card.value / card.max * 100) || 0)}%`
+                        width: ${card.progress !== undefined ? card.progress : Math.min(100, (card.value / card.max * 100) || 0)}%
                       }}
                     ></div>
                   </div>
@@ -227,13 +232,21 @@ const Dashboard = () => {
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Activity Overview</h2>
                 <div className="flex space-x-2">
                   <button 
+<<<<<<< HEAD
                     className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'calories' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
+=======
+                    className={px-3 py-1 text-sm rounded-lg ${activeTab === 'calories' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}}
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                     onClick={() => setActiveTab('calories')}
                   >
                     Calories
                   </button>
                   <button 
+<<<<<<< HEAD
                     className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'duration' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
+=======
+                    className={px-3 py-1 text-sm rounded-lg ${activeTab === 'duration' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}}
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                     onClick={() => setActiveTab('duration')}
                   >
                     Duration
@@ -307,10 +320,17 @@ const Dashboard = () => {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
+<<<<<<< HEAD
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {exerciseData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+=======
+                        label={({ name, percent }) => ${name} ${(percent * 100).toFixed(0)}%}
+                      >
+                        {exerciseData.map((entry, index) => (
+                          <Cell key={cell-${index}} fill={COLORS[index % COLORS.length]} />
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                         ))}
                       </Pie>
                       <Legend />
@@ -503,7 +523,11 @@ const Dashboard = () => {
                     className="p-4 rounded-xl transition-all duration-300 hover:shadow-md"
                     style={{ 
                       backgroundColor: goal.completed ? theme.successLight : theme.accentLight,
+<<<<<<< HEAD
                       borderLeft: `4px solid ${goal.completed ? theme.success : theme.primary}`
+=======
+                      borderLeft: 4px solid ${goal.completed ? theme.success : theme.primary}
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                     }}
                   >
                     <div className="flex items-start">

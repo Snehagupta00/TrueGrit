@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -88,7 +89,11 @@ function NutritionLog() {
     focus: { 
       scale: 1.02, 
       borderColor: theme.primary,
+<<<<<<< HEAD
       boxShadow: `0 0 0 2px ${theme.accentLight}`,
+=======
+      boxShadow: 0 0 0 2px ${theme.accentLight},
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
       transition: { duration: 0.2 } 
     },
     blur: { 

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -79,7 +80,7 @@ function Goals() {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/api/goals/${id}`);
+      await api.delete(/api/goals/${id});
       setGoals(goals.filter((g) => g._id !== id));
       toast.success('Goal deleted successfully!');
     } catch (error) {
@@ -91,11 +92,19 @@ function Goals() {
   const toggleGoalCompletion = async (id) => {
     try {
       const goalToUpdate = goals.find(g => g._id === id);
+<<<<<<< HEAD
       const res = await api.patch(`/api/goals/${id}`, {
         completed: !goalToUpdate.completed
       });
       setGoals(goals.map(g => g._id === id ? res.data : g));
       toast.success(`Goal marked as ${!goalToUpdate.completed ? 'completed' : 'incomplete'}!`);
+=======
+      const res = await api.patch(/api/goals/${id}, {
+        completed: !goalToUpdate.completed
+      });
+      setGoals(goals.map(g => g._id === id ? res.data : g));
+      toast.success(Goal marked as ${!goalToUpdate.completed ? 'completed' : 'incomplete'}!);
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
     } catch (error) {
       toast.error('Failed to update goal status.');
       console.error('Error updating goal:', error);
@@ -310,7 +319,11 @@ function Goals() {
                   className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 >
                   <div className="flex items-start">
+<<<<<<< HEAD
                     <div className={`p-2 rounded-lg ${goalInfo.color} mr-3`}>
+=======
+                    <div className={p-2 rounded-lg ${goalInfo.color} mr-3}>
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                       {goalInfo.icon}
                     </div>
                     
@@ -373,7 +386,11 @@ function Goals() {
                                   ? 'bg-red-500'
                                   : 'bg-indigo-500'
                             }`}
+<<<<<<< HEAD
                             style={{ width: `${g.completed ? 100 : progress}%` }}
+=======
+                            style={{ width: ${g.completed ? 100 : progress}% }}
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                           ></div>
                         </div>
                         
@@ -386,7 +403,11 @@ function Goals() {
                               ? 'Completed'
                               : isOverdue
                                 ? 'Past deadline'
+<<<<<<< HEAD
                                 : `${Math.ceil((new Date(g.deadline) - new Date()) / (1000 * 60 * 60 * 24))} days left`
+=======
+                                : ${Math.ceil((new Date(g.deadline) - new Date()) / (1000 * 60 * 60 * 24))} days left
+>>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                             }
                           </span>
                         </div>
