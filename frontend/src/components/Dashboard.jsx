@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import api, { setAuthToken } from '../lib/api';
@@ -95,7 +94,7 @@ const Dashboard = () => {
 
   // Process data for charts
   const chartData = (stats.activities || []).map((activity, index) => ({
-    name: Day ${index + 1},
+    name: `Day ${index + 1}`,
     calories: activity.caloriesBurned || 0,
     duration: activity.duration || 0,
   }));
@@ -108,10 +107,9 @@ const Dashboard = () => {
 
   const totalCaloriesBurned = stats.activities.reduce((sum, activity) => sum + (activity.calories || 0), 0);
   const totalCaloriesConsumed = stats.nutrition.reduce((sum, item) => sum + (item.calories || 0), 0);
-  const completedGoals = stats.goals.filter(goal => goal.completed).length;
+  const totalGoals = stats.goals.filter(goal => goal.completed).length;
   const totalExerciseMinutes = stats.activities.reduce((sum, activity) => sum + (activity.duration || 0), 0);
   
-  // Define stat cards data
   const statCards = [
     {
       title: 'Calories Burned',
@@ -136,15 +134,11 @@ const Dashboard = () => {
       ),
     },
     {
-      title: 'Goals Completed',
-      value: completedGoals,
-<<<<<<< HEAD
-      unit: `/${stats.goals.length || 0}`,
-=======
-      unit: /${stats.goals.length || 0},
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
+      title: 'Total Goals',
+      value: stats.goals.length || 0,
+      unit: 'goals',
       max: stats.goals.length || 1,
-      progress: stats.goals.length ? (completedGoals / stats.goals.length * 100) : 0,
+      progress: 100,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -213,7 +207,7 @@ const Dashboard = () => {
                       className="h-2 rounded-full transition-all duration-500"
                       style={{
                         backgroundColor: theme.primary,
-                        width: ${card.progress !== undefined ? card.progress : Math.min(100, (card.value / card.max * 100) || 0)}%
+                        width: `${card.progress !== undefined ? card.progress : Math.min(100, (card.value / card.max * 100) || 0)}%`
                       }}
                     ></div>
                   </div>
@@ -232,21 +226,13 @@ const Dashboard = () => {
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Activity Overview</h2>
                 <div className="flex space-x-2">
                   <button 
-<<<<<<< HEAD
                     className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'calories' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
-=======
-                    className={px-3 py-1 text-sm rounded-lg ${activeTab === 'calories' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}}
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                     onClick={() => setActiveTab('calories')}
                   >
                     Calories
                   </button>
                   <button 
-<<<<<<< HEAD
                     className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'duration' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
-=======
-                    className={px-3 py-1 text-sm rounded-lg ${activeTab === 'duration' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}}
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                     onClick={() => setActiveTab('duration')}
                   >
                     Duration
@@ -320,17 +306,10 @@ const Dashboard = () => {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-<<<<<<< HEAD
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {exerciseData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-=======
-                        label={({ name, percent }) => ${name} ${(percent * 100).toFixed(0)}%}
-                      >
-                        {exerciseData.map((entry, index) => (
-                          <Cell key={cell-${index}} fill={COLORS[index % COLORS.length]} />
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                         ))}
                       </Pie>
                       <Legend />
@@ -379,7 +358,7 @@ const Dashboard = () => {
               </div>
               {stats.activities && stats.activities.length > 0 ? (
                 <div className="space-y-4">
-                  {stats.activities.slice(0, 5).map((activity, index) => (
+                  {stats.activities.slice(0, 20).map((activity, index) => (
                     <div
                       key={activity._id || index}
                       className="flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -505,7 +484,7 @@ const Dashboard = () => {
         </div>
 
         {/* Goals Section */}
-        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+        <div className="mt-6 bg-black dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Goals</h2>
@@ -523,11 +502,7 @@ const Dashboard = () => {
                     className="p-4 rounded-xl transition-all duration-300 hover:shadow-md"
                     style={{ 
                       backgroundColor: goal.completed ? theme.successLight : theme.accentLight,
-<<<<<<< HEAD
                       borderLeft: `4px solid ${goal.completed ? theme.success : theme.primary}`
-=======
-                      borderLeft: 4px solid ${goal.completed ? theme.success : theme.primary}
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
                     }}
                   >
                     <div className="flex items-start">
@@ -544,11 +519,11 @@ const Dashboard = () => {
                       </div>
                       <div className="ml-3">
                         <h3 className={`font-medium ${
-                          goal.completed ? 'text-gray-600 dark:text-gray-300 line-through' : 'text-gray-900 dark:text-white'
+                          goal.completed ? 'text-black dark:text-gray-300 line-through' : 'text-gray-200 dark:text-black'
                         }`}>
                           {goal.type}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <p className="text-sm text-black dark:text-gray-400 mt-1">
                           Target: {goal.target}
                         </p>
                         {goal.deadline && (

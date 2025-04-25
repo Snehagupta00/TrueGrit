@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
@@ -36,7 +35,7 @@ function ActivityLog() {
     dangerLight: '#FEE2E2',
   };
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
     if (!activity.type.trim()) newErrors.type = 'Activity type is required';
     if (!activity.duration || Number(activity.duration) <= 0) newErrors.duration = 'Duration must be a positive number';
@@ -45,12 +44,12 @@ function ActivityLog() {
     if (!activity.date) newErrors.date = 'Date is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [activity]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     setIsSubmitting(true);
     try {
       await api.post('/api/activity', {
@@ -75,17 +74,13 @@ function ActivityLog() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [activity, validateForm]);
 
   const inputVariants = {
     focus: { 
       scale: 1.02, 
       borderColor: theme.primary,
-<<<<<<< HEAD
       boxShadow: `0 0 0 2px ${theme.accentLight}`,
-=======
-      boxShadow: 0 0 0 2px ${theme.accentLight},
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
       transition: { duration: 0.2 } 
     },
     blur: { 
