@@ -113,16 +113,6 @@ function Navbar({ toggleTheme }) {
 
         {/* Navigation Links */}
         <div className="flex-grow overflow-y-auto py-4 custom-scrollbar">
-<<<<<<< HEAD
-          <div className="px-4 mb-6">
-            {isSidebarOpen && (
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: theme.textSecondary }}>
-                Navigation
-              </span>
-            )}
-          </div>
-=======
->>>>>>> 75ccdc56a8ed6a0017fdbe16c96b65841f053ae0
           <div className="flex flex-col space-y-1 px-3">
             {navLinks.map(({ to, label, icon: Icon }, index) => (
               <motion.div
