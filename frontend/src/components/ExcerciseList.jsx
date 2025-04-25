@@ -1,7 +1,21 @@
-import { useState } from 'react';
+
+import { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+
+const exerciseImages = {
+  'Push-ups': 'https://www.muscletech.in/wp-content/uploads/2025/01/push-up-exercises.webp',
+  'Squats': 'https://media.istockphoto.com/id/1917187221/photo/group-of-sporty-friends-doing-squats-with-instructor-in-a-gym.jpg?s=612x612&w=0&k=20&c=QLWCh9URLOtNn9YcrGKK_T3GtbmZNuTjRdcUEjTLPqs=',
+  'Jumping Jacks': 'https://cdn.prod.website-files.com/62e18da95149ec2ee0d87b5b/65b0d643eb8c14b2ff3c6eaf_thumbnail-image-65ae476a9d643.webp',
+  'Plank': 'https://hips.hearstapps.com/hmg-prod/images/athletic-man-doing-the-plank-for-abs-and-core-royalty-free-image-1708006586.jpg',
+  'Burpees': 'https://cdn.shopify.com/s/files/1/0645/8762/8770/files/Fitness-Fix-Burpee_480x480.jpg?v=1712301822',
+  'Lunges': 'https://images.healthshots.com/healthshots/en/uploads/2024/05/02174153/Lunges.jpg',
+  'Bicycle Crunches': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn0p8CTy-XN_UdKdJ1fznz8pQThqd3eZJSyg&s',
+  'Mountain Climbers': 'https://images.ctfassets.net/hjcv6wdwxsdz/1WCM5ZFQUTUvuDohwMqr3B/f9b0d7e0eefafd21806937e72b2f867e/mountain-climbers.png?w=800&h=588&q=50&fm=avif',
+  'Glute Bridge': 'https://i.ytimg.com/vi/O9j_DU_4KXs/mqdefault.jpg',
+  'Russian Twists': 'https://t3.ftcdn.net/jpg/04/35/06/64/360_F_435066484_f56vSwQ0hzPeXQaCF4LaS2Se9hsGK8hp.jpg',
+};
 
 function ExerciseApp() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -147,36 +161,38 @@ function ExerciseApp() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative flex flex-col h-screen overflow-hidden bg-gray-50 dark:bg-gray-900"
+      className="relative flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900"
     >
       <header className="sticky top-0 z-10 px-6 py-8 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 text-center">
-          Workout Exercises
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto text-center">
-          Explore and track your favorite exercises.
-        </p>
-        <div className="mt-8 flex justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 inline-flex space-x-2 overflow-x-auto max-w-full scrollbar-hide">
-            {['all', 'strength', 'cardio', 'core'].map((category) => (
-              <button
-                key={category}
-                className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 whitespace-nowrap ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white dark:bg-blue-500 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                onClick={() => setSelectedCategory(category)}
-                aria-current={selectedCategory === category ? 'true' : 'false'}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+            Workout Exercises
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto text-center">
+            Explore and track your favorite exercises.
+          </p>
+          <div className="mt-8 flex justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 inline-flex space-x-2 overflow-x-auto max-w-full scrollbar-hide">
+              {['all', 'strength', 'cardio', 'core'].map((category) => (
+                <button
+                  key={category}
+                  className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 whitespace-nowrap ${
+                    selectedCategory === category
+                      ? 'bg-blue-600 text-white dark:bg-blue-500 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  onClick={() => setSelectedCategory(category)}
+                  aria-current={selectedCategory === category ? 'true' : 'false'}
+                >
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-6 pb-6">
+      <main className="flex-1 px-6 pb-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
             {filteredExercises.map((exercise) => (
@@ -193,14 +209,21 @@ function ExerciseCard({ exercise }) {
   const [expanded, setExpanded] = useState(false);
   const [customTime, setCustomTime] = useState(exercise.defaultTime);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(customTime);
 
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = timeInSeconds % 60;
-    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    return ${minutes}:${seconds < 10 ? '0' + seconds : seconds};
   };
 
   const handleStart = async () => {
+    if (isActive) {
+      setIsActive(false);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await api.post('/api/activity', {
@@ -209,7 +232,9 @@ function ExerciseCard({ exercise }) {
         intensity: 'medium',
         calories: Math.round((customTime / 60) * 100),
       });
-      toast.success(`${exercise.name} logged for ${formatTime(customTime)}!`);
+      toast.success(${exercise.name} logged for ${formatTime(customTime)}!);
+      setIsActive(true);
+      setTimeLeft(customTime);
     } catch (error) {
       toast.error('Failed to log exercise.');
       console.error('Error logging exercise:', error);
@@ -218,16 +243,45 @@ function ExerciseCard({ exercise }) {
     }
   };
 
+  useEffect(() => {
+    let interval;
+    if (isActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isActive) {
+      setIsActive(false);
+      toast.success(Time's up! Great job with ${exercise.name}!);
+    }
+    return () => clearInterval(interval);
+  }, [isActive, timeLeft, exercise.name]);
+
+  const progress = (timeLeft / customTime) * 100;
+
   return (
     <motion.div
       className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
       whileHover={{ scale: 1.02 }}
     >
-      <div className="relative h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-        <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-        <p className="absolute bottom-4 text-sm text-gray-600 dark:text-gray-300">{exercise.name}</p>
+      <div className="relative h-48 overflow-hidden">
+        <img 
+          src={exerciseImages[exercise.name] || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=640&q=80'} 
+          alt={exercise.name}
+          className="w-full h-full object-cover"
+        />
+        {isActive && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <div className="text-white text-4xl font-bold">
+              {formatTime(timeLeft)}
+            </div>
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700">
+          <div 
+            className="h-full bg-blue-500 transition-all duration-1000 ease-linear"
+            style={{ width: ${progress}% }}
+          ></div>
+        </div>
       </div>
       <div className="p-6">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{exercise.name}</h3>
@@ -249,9 +303,10 @@ function ExerciseCard({ exercise }) {
           <span className="text-gray-900 dark:text-white font-medium mr-3">Duration:</span>
           <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
             <button
-              className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center hover:bg-blue-600 transition-colors"
+              className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center hover:bg-blue-600 transition-colors disabled:opacity-50"
               onClick={() => setCustomTime(Math.max(15, customTime - 15))}
               aria-label="Decrease duration"
+              disabled={isActive}
             >
               -
             </button>
@@ -259,9 +314,10 @@ function ExerciseCard({ exercise }) {
               {formatTime(customTime)}
             </div>
             <button
-              className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center hover:bg-blue-600 transition-colors"
+              className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center hover:bg-blue-600 transition-colors disabled:opacity-50"
               onClick={() => setCustomTime(customTime + 15)}
               aria-label="Increase duration"
+              disabled={isActive}
             >
               +
             </button>
@@ -281,12 +337,13 @@ function ExerciseCard({ exercise }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={`flex-1 py-3 px-5 text-white rounded-lg transition-all font-semibold ${
-              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600'
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 
+              isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600'
             }`}
             onClick={handleStart}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Logging...' : 'Start'}
+            {isSubmitting ? 'Logging...' : isActive ? 'Stop' : 'Start'}
           </motion.button>
         </div>
         {expanded && (
