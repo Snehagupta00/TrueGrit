@@ -1,22 +1,26 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import 'dotenv/config';
-import { clerkMiddleware } from '@clerk/express';
+
+// Import configurations
+import connectDB, { disconnectDB } from './config/db.js';
+import { clerkMiddleware } from './config/clerk.js';
 
 // Validate environment variables
 const requiredEnvVars = ['CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY', 'MONGO_URI'];
 const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
-  console.error(`Missing environment variables: ${missingEnvVars.join(', ')}`);
+  console.error(`❌ Missing environment variables: ${missingEnvVars.join(', ')}`);
   process.exit(1);
 }
 
 const app = express();
 
+// CORS Configuration
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:3000',
   'https://truegrit.vercel.app'
 ];
 
@@ -40,16 +44,11 @@ app.use(clerkMiddleware());
 
 // Basic route
 app.get('/', (req, res) => {
-  res.send(`Welcome to TrueGit backend 🚀`);
+  res.send(`Welcome to TrueGrit backend 🚀`);
 });
 
 // Database connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
+connectDB();
 
 // Routes
 import activityRoutes from './routes/activity.js';
@@ -64,10 +63,18 @@ app.use('/api/goals', goalsRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/profile', profileRoutes);
 
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n📡 Shutting down gracefully...');
+  await disconnectDB();
+  console.log('✅ Server closed gracefully');
+  process.exit(0);
+});
+
 // Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-  .on('error', (err) => {
-    console.error('Server error:', err);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`💾 Database: Connected with DNS fallback`);
+  console.log(`🔐 Authentication: Clerk`);
+});

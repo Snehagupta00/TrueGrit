@@ -2,13 +2,15 @@ import User from '../models/User.js';
 
 // Get or create user
 export const getOrCreateUser = async (req, res) => {
-  const clerkUserId = req.auth?.userId;
-  const clerkUser = req.auth?.user;
-  if (!clerkUserId || !clerkUser) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   try {
+    const auth = req.auth();
+    const clerkUserId = auth?.userId;
+    const clerkUser = auth?.user;
+    
+    if (!clerkUserId || !clerkUser) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     let user = await User.findOne({ clerkUserId });
     if (!user) {
       user = new User({

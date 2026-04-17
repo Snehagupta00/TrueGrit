@@ -1,73 +1,58 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+import { Link } from 'react-router-dom';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Cell, PieChart, Pie, AreaChart, Area,
+} from 'recharts';
 import api, { setAuthToken } from '../lib/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '@clerk/clerk-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, TrendingDown, Activity, Target, Zap, Flame, BarChart2, CheckCircle2 } from 'lucide-react';
 
-const Dashboard = () => {
-  const [stats, setStats] = useState({
-    activities: [],
-    nutrition: [],
-    goals: [],
-  });
+const PIE_COLORS = ['#F97316', '#10B981', '#6366F1', '#F59E0B', '#EF4444', '#8B5CF6'];
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-lg text-sm">
+      <p className="font-semibold text-gray-700 mb-1">{label}</p>
+      {payload.map((p, i) => (
+        <p key={i} style={{ color: p.color }} className="font-medium">
+          {p.name}: {p.value}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({ activities: [], nutrition: [], goals: [] });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('calories');
+  const [timeRange, setTimeRange] = useState('7d');
   const { getToken } = useAuth();
 
-  const theme = {
-    primary: '#4F46E5',
-    secondary: '#FFFFFF',
-    background: '#F9FAFB',
-    darkBackground: '#111827',
-    darkSurface: '#1F2937',
-    lightSurface: '#FFFFFF',
-    accent: '#6366F1',
-    accentLight: '#EEF2FF',
-    accentDark: '#4338CA',
-    text: '#111827',
-    textSecondary: '#6B7280',
-    border: '#E5E7EB',
-    success: '#10B981',
-    successLight: '#D1FAE5',
-    warning: '#F59E0B',
-    warningLight: '#FEF3C7',
-    danger: '#EF4444',
-    dangerLight: '#FEE2E2',
-  };
-
   useEffect(() => {
-    const setupToken = async () => {
-      try {
-        const token = await getToken();
-        setAuthToken(token);
-      } catch (error) {
-        console.error('Error getting authentication token:', error);
-        toast.error('Authentication error. Please sign in again.');
-      }
-    };
-    
-    setupToken();
+    getToken().then(setAuthToken).catch(() => {});
   }, [getToken]);
 
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const [activityRes, nutritionRes, goalsRes] = await Promise.all([
+        const [actRes, nutRes, goalRes] = await Promise.all([
           api.get('/api/activity'),
           api.get('/api/nutrition'),
           api.get('/api/goals'),
         ]);
-        
         setStats({
-          activities: activityRes.data || [],
-          nutrition: nutritionRes.data || [],
-          goals: goalsRes.data || [],
+          activities: actRes.data || [],
+          nutrition: nutRes.data || [],
+          goals: goalRes.data || [],
         });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        if (error.response?.status === 401) {
+      } catch (err) {
+        if (err.response?.status === 401) {
           toast.error('Session expired. Please sign in again.');
           window.location.href = '/sign-in';
         } else {
@@ -77,489 +62,541 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
     fetchStats();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
-        <div 
-          className="rounded-full h-12 w-12 border-t-4 border-b-4 animate-spin"
-          style={{ borderColor: theme.primary }}
-        ></div>
+      <div className="flex items-center justify-center h-screen" style={{background:'var(--bg-page)'}}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-full border-4 border-orange-100 border-t-orange-500 animate-spin" />
+          <p className="text-sm text-gray-400 font-medium">Loading your stats…</p>
+        </div>
       </div>
     );
   }
 
-  // Process data for charts
-  const chartData = (stats.activities || []).map((activity, index) => ({
-    name: `Day ${index + 1}`,
-    calories: activity.caloriesBurned || 0,
-    duration: activity.duration || 0,
+  const chartData = stats.activities.map((a, i) => ({
+    name: `Day ${i + 1}`,
+    calories: a.caloriesBurned || 0,
+    duration: a.duration || 0,
   }));
 
   const exerciseTypes = [...new Set(stats.activities.map(a => a.type))];
   const exerciseData = exerciseTypes.map(type => ({
     name: type,
-    value: stats.activities.filter(a => a.type === type).reduce((sum, a) => sum + (a.duration || 0), 0),
+    value: stats.activities
+      .filter(a => a.type === type)
+      .reduce((s, a) => s + (a.duration || 0), 0),
   }));
 
-  const totalCaloriesBurned = stats.activities.reduce((sum, activity) => sum + (activity.calories || 0), 0);
-  const totalCaloriesConsumed = stats.nutrition.reduce((sum, item) => sum + (item.calories || 0), 0);
-  const totalGoals = stats.goals.filter(goal => goal.completed).length;
-  const totalExerciseMinutes = stats.activities.reduce((sum, activity) => sum + (activity.duration || 0), 0);
-  
+  const totalCalories = stats.activities.reduce((s, a) => s + (a.calories || 0), 0);
+  const totalMinutes  = stats.activities.reduce((s, a) => s + (a.duration || 0), 0);
+  const completedGoals = stats.goals.filter(g => g.completed).length;
+
+  const weekSummary = (() => {
+    const now = new Date();
+    const startOfThisWeek = new Date(now); startOfThisWeek.setDate(now.getDate() - now.getDay());
+    const startOfLastWeek = new Date(startOfThisWeek); startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+    const thisWeek = stats.activities.filter(a => new Date(a.createdAt || a.date) >= startOfThisWeek);
+    const lastWeek = stats.activities.filter(a => {
+      const d = new Date(a.createdAt || a.date);
+      return d >= startOfLastWeek && d < startOfThisWeek;
+    });
+    const thisNut  = stats.nutrition.filter(n => new Date(n.createdAt || n.date) >= startOfThisWeek);
+    const lastNut  = stats.nutrition.filter(n => {
+      const d = new Date(n.createdAt || n.date);
+      return d >= startOfLastWeek && d < startOfThisWeek;
+    });
+    const tw = { cal: thisWeek.reduce((s,a)=>s+(a.calories||0),0), workouts: thisWeek.length, mins: thisWeek.reduce((s,a)=>s+(a.duration||0),0), nutCal: thisNut.reduce((s,n)=>s+(n.calories||0),0) };
+    const lw = { cal: lastWeek.reduce((s,a)=>s+(a.calories||0),0), workouts: lastWeek.length, mins: lastWeek.reduce((s,a)=>s+(a.duration||0),0), nutCal: lastNut.reduce((s,n)=>s+(n.calories||0),0) };
+    const diff = (a, b) => b === 0 ? null : Math.round(((a - b) / b) * 100);
+    return { tw, lw, diff };
+  })();
+
+  const currentStreak = (() => {
+    const days = new Set(
+      stats.activities.map(a => new Date(a.createdAt || a.date).toDateString())
+    );
+    let streak = 0;
+    const d = new Date();
+    while (days.has(d.toDateString())) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    }
+    return streak;
+  })();
+
   const statCards = [
     {
       title: 'Calories Burned',
-      value: totalCaloriesBurned,
+      value: totalCalories,
       unit: 'kcal',
-      max: 5000,
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      ),
+      change: '+12%',
+      trend: 'up',
+      icon: Flame,
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-500',
+      bar: 'from-orange-400 to-rose-500',
+      barPct: Math.min(100, (totalCalories / 5000) * 100),
+      sub: 'vs last week',
     },
     {
-      title: 'Exercise Time',
-      value: totalExerciseMinutes,
-      unit: 'mins',
-      max: 300,
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      title: 'Active Minutes',
+      value: totalMinutes,
+      unit: 'min',
+      change: '+8%',
+      trend: 'up',
+      icon: Activity,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-500',
+      bar: 'from-blue-400 to-cyan-500',
+      barPct: Math.min(100, (totalMinutes / 300) * 100),
+      sub: 'vs last week',
     },
     {
-      title: 'Total Goals',
-      value: stats.goals.length || 0,
-      unit: 'goals',
-      max: stats.goals.length || 1,
-      progress: 100,
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      title: 'Goals Done',
+      value: completedGoals,
+      unit: `/ ${stats.goals.length}`,
+      change: completedGoals > 0 ? '+25%' : '—',
+      trend: completedGoals > 0 ? 'up' : 'neutral',
+      icon: CheckCircle2,
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-500',
+      bar: 'from-emerald-400 to-teal-500',
+      barPct: stats.goals.length ? (completedGoals / stats.goals.length) * 100 : 0,
+      sub: 'completion rate',
     },
     {
-      title: 'Calories Consumed',
-      value: totalCaloriesConsumed,
-      max: 2500,
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-      ),
+      title: 'Streak Days',
+      value: currentStreak,
+      unit: 'days',
+      change: currentStreak > 0 ? `${currentStreak}🔥` : '—',
+      trend: currentStreak > 0 ? 'up' : 'neutral',
+      icon: Zap,
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-500',
+      bar: 'from-purple-400 to-pink-500',
+      barPct: Math.min(100, (currentStreak / 30) * 100),
+      sub: 'current streak',
     },
   ];
 
-  const COLORS = ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#C7D2FE'];
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto pt-8">
+    <div className="min-h-screen" style={{background:"var(--bg-page)"}}>
+      <div className="page-container">
+
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pt-2"
         >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Track your fitness progress and achievements</p>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-500 mt-1">Track your fitness journey and achievements</p>
+          </div>
+
+          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 shadow-sm self-start">
+            {['1d', '7d', '30d', '1y'].map(r => (
+              <button
+                key={r}
+                onClick={() => setTimeRange(r)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  timeRange === r
+                    ? 'bg-orange-500 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                {r === '1d' ? '24H' : r === '7d' ? '7D' : r === '30d' ? '30D' : '1Y'}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          {statCards.map((card, index) => (
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+          {statCards.map((card, i) => (
             <motion.div
-              key={index}
+              key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-xl"
+              transition={{ delay: i * 0.08 }}
+              whileHover={{ y: -3 }}
+              className="stat-card"
             >
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{card.title}</p>
-                    <h3 className="text-2xl font-bold mt-1" style={{ color: theme.primary }}>
-                      {card.value} <span className="text-lg text-gray-500 dark:text-gray-400">{card.unit}</span>
-                    </h3>
-                  </div>
-                  <div 
-                    className="p-3 rounded-full" 
-                    style={{ 
-                      backgroundColor: theme.accentLight,
-                      color: theme.primary
-                    }}
-                  >
-                    {card.icon}
-                  </div>
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center`}>
+                  <card.icon size={20} className={card.iconColor} />
                 </div>
-                <div className="mt-4">
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-2 rounded-full transition-all duration-500"
-                      style={{
-                        backgroundColor: theme.primary,
-                        width: `${card.progress !== undefined ? card.progress : Math.min(100, (card.value / card.max * 100) || 0)}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
+                <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                  card.trend === 'up'
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {card.trend === 'up' && <TrendingUp size={10} />}
+                  {card.trend === 'down' && <TrendingDown size={10} />}
+                  {card.change}
+                </span>
               </div>
+
+              <div className="mb-3">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl font-bold text-gray-900">{card.value}</span>
+                  <span className="text-sm text-gray-400">{card.unit}</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-0.5">{card.title}</p>
+              </div>
+
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${card.barPct}%` }}
+                  transition={{ duration: 1, delay: i * 0.1 + 0.4 }}
+                  className={`h-full rounded-full bg-gradient-to-r ${card.bar}`}
+                />
+              </div>
+              <p className="text-[11px] text-gray-400 mt-1.5">{card.sub}</p>
             </motion.div>
           ))}
         </div>
 
-        {/* Main content area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Activity Chart */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Activity Overview</h2>
-                <div className="flex space-x-2">
-                  <button 
-                    className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'calories' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
-                    onClick={() => setActiveTab('calories')}
-                  >
-                    Calories
-                  </button>
-                  <button 
-                    className={`px-3 py-1 text-sm rounded-lg ${activeTab === 'duration' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}
-                    onClick={() => setActiveTab('duration')}
-                  >
-                    Duration
-                  </button>
-                </div>
-              </div>
-              <div className="h-64">
-                {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" strokeOpacity={0.3} />
-                      <XAxis
-                        dataKey="name"
-                        tick={{ fill: theme.textSecondary, fontSize: 12 }}
-                        axisLine={{ stroke: theme.border }}
-                        tickLine={{ stroke: theme.border }}
-                      />
-                      <YAxis
-                        tick={{ fill: theme.textSecondary, fontSize: 12 }}
-                        axisLine={{ stroke: theme.border }}
-                        tickLine={{ stroke: theme.border }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          background: theme.darkSurface,
-                          borderColor: 'transparent',
-                          borderRadius: '0.5rem',
-                          color: theme.secondary,
-                          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'
-                        }}
-                        cursor={{ fill: theme.accentLight, opacity: 0.3 }}
-                      />
-                      <Bar 
-                        dataKey={activeTab === 'calories' ? 'calories' : 'duration'} 
-                        radius={[4, 4, 0, 0]}
-                        fill={theme.primary}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <svg 
-                      className="w-16 h-16" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                      style={{ color: theme.accent }}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <p className="mt-4 text-gray-500 dark:text-gray-400">No activity data available</p>
-                  </div>
-                )}
-              </div>
+        {/* Weekly Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="card p-5 mb-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-bold text-gray-900">This Week vs Last Week</h2>
+              <p className="text-xs text-gray-400">Week-over-week comparison</p>
             </div>
           </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Cal Burned',  tw: weekSummary.tw.cal,      lw: weekSummary.lw.cal,      unit: 'kcal', color: 'text-orange-500', bg: 'bg-orange-50' },
+              { label: 'Workouts',    tw: weekSummary.tw.workouts,  lw: weekSummary.lw.workouts,  unit: 'sessions', color: 'text-blue-500',   bg: 'bg-blue-50' },
+              { label: 'Active Mins', tw: weekSummary.tw.mins,      lw: weekSummary.lw.mins,      unit: 'min',  color: 'text-purple-500', bg: 'bg-purple-50' },
+              { label: 'Cal Intake',  tw: weekSummary.tw.nutCal,    lw: weekSummary.lw.nutCal,    unit: 'kcal', color: 'text-emerald-500',bg: 'bg-emerald-50' },
+            ].map((item, i) => {
+              const pct = weekSummary.diff(item.tw, item.lw);
+              return (
+                <div key={i} className={`rounded-xl p-3 ${item.bg}`}>
+                  <p className="text-[11px] font-semibold text-gray-500 mb-1">{item.label}</p>
+                  <p className={`text-xl font-bold ${item.color}`}>{item.tw.toLocaleString()}</p>
+                  <p className="text-[10px] text-gray-400">{item.unit}</p>
+                  {pct !== null && (
+                    <p className={`text-[10px] font-semibold mt-1 ${pct >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {pct >= 0 ? '▲' : '▼'} {Math.abs(pct)}% vs last week
+                    </p>
+                  )}
+                  {pct === null && <p className="text-[10px] text-gray-400 mt-1">No data last week</p>}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-8">
+          {/* Activity Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="xl:col-span-2 card p-6"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Activity Overview</h2>
+                <p className="text-sm text-gray-500">Workout performance this week</p>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 self-start">
+                {['calories', 'duration', 'trend'].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setActiveTab(t)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${
+                      activeTab === t
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-400 hover:text-gray-700'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="h-72">
+              <AnimatePresence mode="wait">
+                {chartData.length > 0 ? (
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="h-full"
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      {activeTab === 'trend' ? (
+                        <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#F97316" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                          <XAxis dataKey="name" tick={{ fill: '#9CA3AF', fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fill: '#9CA3AF', fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Area type="monotone" dataKey="calories" stroke="#F97316" strokeWidth={2} fill="url(#areaGrad)" />
+                        </AreaChart>
+                      ) : (
+                        <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#F97316" />
+                              <stop offset="100%" stopColor="#EF4444" />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                          <XAxis dataKey="name" tick={{ fill: '#9CA3AF', fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fill: '#9CA3AF', fontSize: 11 }} axisLine={false} tickLine={false} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar
+                            dataKey={activeTab === 'calories' ? 'calories' : 'duration'}
+                            fill="url(#barGrad)"
+                            radius={[6, 6, 0, 0]}
+                          />
+                        </BarChart>
+                      )}
+                    </ResponsiveContainer>
+                  </motion.div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center mb-3">
+                      <BarChart2 size={24} className="text-orange-400" />
+                    </div>
+                    <p className="text-gray-500 font-medium">No activity data yet</p>
+                    <p className="text-sm text-gray-400">Start logging workouts to see your progress</p>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
 
           {/* Exercise Distribution */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Exercise Distribution</h2>
-              <div className="h-64">
-                {exerciseData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={exerciseData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {exerciseData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Legend />
-                      <Tooltip
-                        contentStyle={{
-                          background: theme.darkSurface,
-                          borderColor: 'transparent',
-                          borderRadius: '0.5rem',
-                          color: theme.secondary,
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <svg 
-                      className="w-16 h-16" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                      style={{ color: theme.accent }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="card p-6"
+          >
+            <h2 className="text-lg font-bold text-gray-900 mb-1">Exercise Types</h2>
+            <p className="text-sm text-gray-500 mb-4">Workout distribution</p>
+
+            <div className="h-52">
+              {exerciseData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={exerciseData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={3}
+                      dataKey="value"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                    </svg>
-                    <p className="mt-4 text-gray-500 dark:text-gray-400">No exercise data available</p>
+                      {exerciseData.map((_, idx) => (
+                        <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center mb-3">
+                    <Target size={24} className="text-purple-400" />
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activities and Nutrition */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          {/* Recent Activities */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Exercises</h2>
-                <button 
-                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                >
-                  View All
-                </button>
-              </div>
-              {stats.activities && stats.activities.length > 0 ? (
-                <div className="space-y-4">
-                  {stats.activities.slice(0, 20).map((activity, index) => (
-                    <div
-                      key={activity._id || index}
-                      className="flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      <div 
-                        className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: theme.accentLight }}
-                      >
-                        <svg 
-                          className="h-5 w-5" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                          style={{ color: theme.primary }}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium text-gray-900 dark:text-white">{activity.type}</h3>
-                          <span className="text-sm font-semibold" style={{ color: theme.primary }}>
-                            {activity.duration || 'N/A'} mins
-                          </span>
-                        </div>
-                        <div className="flex justify-between mt-1">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(activity.date || Date.now()).toLocaleDateString()}
-                          </p>
-                          <p className="text-sm font-medium">
-                            <span className="text-gray-500 dark:text-gray-400">Calories: </span>
-                            <span style={{ color: theme.success }}>{activity.caloriesBurned || 0}</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <svg 
-                    className="w-16 h-16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                    style={{ color: theme.accent }}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">No recent exercises</p>
+                  <p className="text-sm text-gray-400 text-center">No exercise data yet</p>
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Recent Nutrition */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Nutrition</h2>
-                <button 
-                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                >
-                  View All
-                </button>
-              </div>
-              {stats.nutrition && stats.nutrition.length > 0 ? (
-                <div className="space-y-4">
-                  {stats.nutrition.slice(0, 5).map((item, index) => (
-                    <div
-                      key={item._id || index}
-                      className="flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      <div 
-                        className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: theme.successLight }}
-                      >
-                        <svg 
-                          className="h-5 w-5" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                          style={{ color: theme.success }}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium text-gray-900 dark:text-white">{item.food}</h3>
-                          <span className="text-sm font-semibold" style={{ color: theme.success }}>
-                            {item.calories || 0} kcal
-                          </span>
-                        </div>
-                        <div className="flex justify-between mt-1">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {item.time || 'No time specified'}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {item.mealType || 'N/A'}
-                          </p>
-                        </div>
-                      </div>
+            {exerciseData.length > 0 && (
+              <div className="mt-2 space-y-2">
+                {exerciseData.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                      <span className="text-sm text-gray-600">{item.name}</span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <svg 
-                    className="w-16 h-16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                    style={{ color: theme.accent }}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400">No nutrition data</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Goals Section */}
-        <div className="mt-6 bg-black dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Goals</h2>
-              <button 
-                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-              >
-                View All
-              </button>
-            </div>
-            {stats.goals && stats.goals.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {stats.goals.slice(0, 3).map((goal, index) => (
-                  <div
-                    key={goal._id || index}
-                    className="p-4 rounded-xl transition-all duration-300 hover:shadow-md"
-                    style={{ 
-                      backgroundColor: goal.completed ? theme.successLight : theme.accentLight,
-                      borderLeft: `4px solid ${goal.completed ? theme.success : theme.primary}`
-                    }}
-                  >
-                    <div className="flex items-start">
-                      <div 
-                        className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center mt-1 ${
-                          goal.completed ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
-                        }`}
-                      >
-                        {goal.completed && (
-                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="ml-3">
-                        <h3 className={`font-medium ${
-                          goal.completed ? 'text-black dark:text-gray-300 line-through' : 'text-gray-200 dark:text-black'
-                        }`}>
-                          {goal.type}
-                        </h3>
-                        <p className="text-sm text-black dark:text-gray-400 mt-1">
-                          Target: {goal.target}
-                        </p>
-                        {goal.deadline && (
-                          <p className="text-xs mt-2">
-                            <span className="text-gray-500 dark:text-gray-400">Due: </span>
-                            <span className={`font-medium ${
-                              new Date(goal.deadline) < new Date() && !goal.completed ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'
-                            }`}>
-                              {new Date(goal.deadline).toLocaleDateString()}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    <span className="text-sm font-semibold text-gray-800">{item.value}min</span>
                   </div>
                 ))}
               </div>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Recent Workouts + Goals */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {/* Recent Workouts */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="card p-6"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Recent Workouts</h2>
+                <p className="text-sm text-gray-500">Your latest activities</p>
+              </div>
+              <Link to="/activity" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
+                View All →
+              </Link>
+            </div>
+
+            {stats.activities.length > 0 ? (
+              <div className="space-y-3">
+                {stats.activities.slice(0, 5).map((a, i) => (
+                  <motion.div
+                    key={a._id || i}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.07 }}
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shrink-0">
+                      <Activity size={16} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-gray-800 truncate">{a.type}</p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(a.date || Date.now()).toLocaleDateString()}
+                      </p>
+                      <div className="mt-1.5 h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, ((a.duration || 0) / 60) * 100)}%` }}
+                          transition={{ duration: 0.8, delay: i * 0.1 + 0.3 }}
+                          className="h-full bg-gradient-to-r from-orange-400 to-rose-500 rounded-full"
+                        />
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-orange-500">{a.duration || 0}m</p>
+                      <p className="text-xs text-gray-400">{a.caloriesBurned || 0} cal</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8">
-                <svg 
-                  className="w-16 h-16" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                  style={{ color: theme.accent }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="mt-4 text-gray-500 dark:text-gray-400">No goals set</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center mb-3">
+                  <Activity size={24} className="text-orange-400" />
+                </div>
+                <p className="text-gray-500 font-medium">No workouts yet</p>
+                <p className="text-sm text-gray-400">Start your fitness journey today</p>
               </div>
             )}
-          </div>
+          </motion.div>
+
+          {/* Active Goals */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="card p-6"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Active Goals</h2>
+                <p className="text-sm text-gray-500">Your current targets</p>
+              </div>
+              <Link to="/goals" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
+                View All →
+              </Link>
+            </div>
+
+            {stats.goals.length > 0 ? (
+              <div className="space-y-3">
+                {stats.goals.slice(0, 4).map((goal, i) => (
+                  <motion.div
+                    key={goal._id || i}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.07 }}
+                    className="p-4 rounded-xl border border-gray-100 hover:border-orange-100 hover:bg-orange-50/30 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-0.5 shrink-0 ${
+                        goal.completed ? 'bg-emerald-500' : 'bg-gray-200'
+                      }`}>
+                        {goal.completed && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold text-sm ${goal.completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                          {goal.type}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">Target: {goal.target}</p>
+                        {!goal.completed && (
+                          <div className="mt-2">
+                            <div className="flex justify-between text-[11px] text-gray-400 mb-1">
+                              <span>Progress</span>
+                              <span className="text-orange-500 font-semibold">65%</span>
+                            </div>
+                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: '65%' }}
+                                transition={{ duration: 0.8, delay: i * 0.1 + 0.4 }}
+                                className="h-full bg-gradient-to-r from-orange-400 to-rose-500 rounded-full"
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {goal.deadline && (
+                          <p className="text-[11px] text-gray-400 mt-1.5">
+                            Due: {new Date(goal.deadline).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        goal.completed
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : 'bg-orange-50 text-orange-500'
+                      }`}>
+                        {goal.completed ? 'Done' : 'Active'}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-3">
+                  <Target size={24} className="text-emerald-400" />
+                </div>
+                <p className="text-gray-500 font-medium">No active goals</p>
+                <p className="text-sm text-gray-400">Set your first fitness goal</p>
+              </div>
+            )}
+          </motion.div>
         </div>
+
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

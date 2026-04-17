@@ -2,12 +2,15 @@ import Goal from '../models/Goal.js';
 
 // Create a new goal
 export const createGoal = async (req, res) => {
-  const { type, target } = req.body;
-  const clerkUserId = req.auth?.userId;
-  if (!clerkUserId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
   try {
+    const { type, target } = req.body;
+    const auth = req.auth();
+    const clerkUserId = auth?.userId;
+    
+    if (!clerkUserId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     const goal = new Goal({ clerkUserId, type, target });
     await goal.save();
     res.status(201).json(goal);
@@ -18,11 +21,14 @@ export const createGoal = async (req, res) => {
 
 // Get all goals for a user
 export const getGoals = async (req, res) => {
-  const clerkUserId = req.auth?.userId;
-  if (!clerkUserId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
   try {
+    const auth = req.auth();
+    const clerkUserId = auth?.userId;
+    
+    if (!clerkUserId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     const goals = await Goal.find({ clerkUserId });
     res.json(goals);
   } catch (error) {
@@ -32,13 +38,16 @@ export const getGoals = async (req, res) => {
 
 // Update a goal
 export const updateGoal = async (req, res) => {
-  const { id } = req.params;
-  const { type, target } = req.body;
-  const clerkUserId = req.auth?.userId;
-  if (!clerkUserId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
   try {
+    const { id } = req.params;
+    const { type, target } = req.body;
+    const auth = req.auth();
+    const clerkUserId = auth?.userId;
+    
+    if (!clerkUserId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     const goal = await Goal.findOneAndUpdate(
       { _id: id, clerkUserId },
       { type, target },
@@ -55,12 +64,15 @@ export const updateGoal = async (req, res) => {
 
 // Delete a goal
 export const deleteGoal = async (req, res) => {
-  const { id } = req.params;
-  const clerkUserId = req.auth?.userId;
-  if (!clerkUserId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
   try {
+    const { id } = req.params;
+    const auth = req.auth();
+    const clerkUserId = auth?.userId;
+    
+    if (!clerkUserId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     const goal = await Goal.findOneAndDelete({ _id: id, clerkUserId });
     if (!goal) {
       return res.status(404).json({ error: 'Goal not found' });

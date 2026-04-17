@@ -1,164 +1,290 @@
-# <img src="https://raw.githubusercontent.com/Snehagupta00/TrueGrit/main/public/favicon.ico" width="30" height="30"> TrueGrit - Fitness Tracker
+# TrueGrit — Fitness Tracker
 
-[![Vercel Deployment](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat&logo=vercel)](https://truegrit.vercel.app)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://mongodb.com/)
+[![Clerk Auth](https://img.shields.io/badge/Auth-Clerk-6C47FF?logo=clerk&logoColor=white)](https://clerk.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![React](https://img.shields.io/badge/React-18.2+-61DAFB?logo=react)](https://react.dev/)
-[![Clerk Auth](https://img.shields.io/badge/Auth-Clerk-8B5CF6)](https://clerk.com)
 
-A modern full-stack fitness tracking application that helps users monitor workouts, nutrition, and goals with beautiful visualizations and secure authentication.
+A modern full-stack fitness tracking web app to log workouts, track nutrition, manage goals, and monitor your progress — with a clean light/dark UI and secure authentication.
 
 🔗 **Live Demo**: [https://truegrit.vercel.app](https://truegrit.vercel.app)
 
-![TrueGrit Dashboard Preview](https://raw.githubusercontent.com/Snehagupta00/TrueGrit/main/public/screenshot.png)
+---
 
-## ✨ Features
+## Features
 
-### 🏋️ Activity Tracking
-- Log workouts with duration, intensity, and calories burned
-- Exercise library with common movements
-- Progress charts with Recharts
+### Dashboard
+- Weekly activity bar chart (Recharts)
+- Calorie trend area chart
+- Stats overview — total calories, workouts, active goals
+- Workout streak counter
+- Recent activity feed with quick "View All" navigation
+- Goal progress summary
 
-### 🥗 Nutrition Management
-- Food diary with calorie tracking
-- Macronutrient breakdown
-- Meal history visualization
+### Workout / Activity Logging
+- Log workouts with type, duration, intensity (Low / Medium / High), and calories
+- Quick-select chips for common activity types (Running, Cycling, Swimming, HIIT, Yoga, Walking)
+- Full history with delete support
+- Calorie burn reference table
 
-### 🎯 Goal System
-- Set SMART fitness goals
-- Track progress with milestones
-- Receive achievement notifications
+### Nutrition Tracking
+- Log meals by type (Breakfast / Lunch / Dinner / Snack)
+- Quick-select common foods with preset macros
+- Live macro ratio preview bar (protein / carbs / fat)
+- Meal history with full nutritional breakdown
+- Daily nutrition tips sidebar
 
-### 🔒 Secure Authentication
-- Password & OAuth login via Clerk
-- JWT-protected API endpoints
-- Session management
+### Goal Management
+- Create goals with type, target value, and deadline
+- Color-coded goal types (Weight Loss, Muscle Gain, Cardio, Flexibility, Nutrition)
+- Active vs. Completed goal tracking
+- Days remaining badge
 
-### 🎨 Modern UI
-- Light/dark mode toggle
-- Mobile-responsive design
-- Animated transitions with Framer Motion
-- Toast notifications
+### Exercise Library
+- 10 curated exercises across Strength / Cardio / Core
+- Per-exercise countdown timer with image overlay
+- Adjustable duration (15s increments)
+- Step-by-step instructions with animated expand
+- One-tap logging to activity history
 
-## 🛠 Tech Stack
+### Profile & Recommendations
+- BMI calculator with live visual bar
+- Fitness level selector (Beginner → Elite)
+- AI-style diet and workout recommendation cards
+- Nutrition history log
 
-| Category       | Technologies                                                                 |
-|----------------|-----------------------------------------------------------------------------|
-| **Frontend**   | React 18, Vite, Tailwind CSS, React Router 6, Framer Motion, Recharts      |
-| **Backend**    | Node.js, Express, MongoDB, Mongoose                                        |
-| **Auth**       | Clerk (JWT authentication)                                                 |
-| **Deployment** | Vercel (Frontend), Render/Railway (Backend)                                |
-| **UI**         | Heroicons, Lucide React, React Hot Toast                                   |
+### UI & UX
+- Collapsible sidebar (desktop) with smooth Framer Motion animation
+- Bottom navigation bar (mobile)
+- Light / Dark mode toggle (CSS custom properties)
+- Fully responsive — mobile-first design
+- Clerk authentication (Email + OAuth)
+- Toast notifications (React Hot Toast)
 
-## 🚀 Quick Start
+---
 
-### Prerequisites
-- Node.js ≥18.x
-- MongoDB (local or Atlas)
-- [Clerk](https://clerk.com) account
+## Tech Stack
 
-### Installation
+| Layer | Technology |
+|---|---|
+| Frontend Framework | React 19 + Vite 6 |
+| Styling | Tailwind CSS 3 (darkMode: class) + CSS custom properties |
+| Routing | React Router DOM v7 |
+| Animation | Framer Motion |
+| Charts | Recharts |
+| Icons | Lucide React |
+| Auth | Clerk |
+| Notifications | React Hot Toast |
+| HTTP Client | Axios |
+| Backend | Node.js + Express |
+| Database | MongoDB + Mongoose |
+| Deployment | Vercel (frontend) + Render/Railway (backend) |
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/Snehagupta00/TrueGrit.git
-   cd TrueGrit
-   ```
+---
 
-2. **Set up backend**
-   ```bash
-   cd backend
-   npm install
-   cp .env.example .env
-   # Fill in your Clerk and MongoDB credentials
-   npm run dev
-   ```
-
-3. **Set up frontend**
-   ```bash
-   cd ../frontend
-   npm install
-   cp .env.example .env
-   # Add your Clerk publishable key
-   npm run dev
-   ```
-
-4. **Configure Clerk**
-   - Add `http://localhost:5173` to authorized redirect URLs
-   - Enable authentication methods (Email/Google)
-
-## 📂 Project Structure
+## Project Structure
 
 ```
 TrueGrit/
-├── backend/            # Express API server
-│   ├── routes/         # Activity, Nutrition, Goals routes
-│   ├── models/         # MongoDB schemas
-│   └── server.js       # Main server entry
-├── frontend/           # React Vite app
-│   ├── src/
-│   │   ├── components/ # React components
-│   │   ├── lib/        # API utilities
-│   │   └── assets/     # Styles & images
-├── public/             # Static files
-└── README.md           # You are here!
+├── backend/
+│   ├── config/
+│   │   ├── db.js               # MongoDB connection
+│   │   └── clerk.js            # Clerk middleware setup
+│   ├── controllers/
+│   │   ├── activityController.js
+│   │   ├── goalsController.js
+│   │   ├── nutritionController.js
+│   │   ├── profileController.js
+│   │   └── userController.js
+│   ├── models/
+│   │   ├── Activity.js
+│   │   ├── Goal.js
+│   │   ├── Nutrition.js
+│   │   ├── Profile.js
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── activity.js
+│   │   ├── goals.js
+│   │   ├── nutrition.js
+│   │   ├── profile.js
+│   │   └── user.js
+│   └── server.js
+└── frontend/
+    └── src/
+        ├── components/
+        │   ├── ActivityLog.jsx     # Workout logging page
+        │   ├── BottomNav.jsx       # Mobile bottom navigation
+        │   ├── Dashboard.jsx       # Main dashboard
+        │   ├── ExcerciseList.jsx   # Exercise library
+        │   ├── Goals.jsx           # Goal tracking
+        │   ├── NavBar.jsx          # Nav composer (sidebar + bottom nav)
+        │   ├── NutritionLog.jsx    # Nutrition logging page
+        │   ├── Profile.jsx         # User profile & recommendations
+        │   └── Sidebar.jsx         # Desktop collapsible sidebar
+        ├── lib/
+        │   └── api.js              # Axios instance with Clerk Bearer token
+        ├── theme/
+        │   └── modernTheme.js      # Theme color tokens
+        ├── App.jsx                 # Root — routes, sidebar state, layout
+        └── index.css               # CSS variables, dark mode overrides, utility classes
 ```
 
-## 🌐 Deployment Guide
+---
 
-1. **Backend**
-   - Deploy to [Render](https://render.com) or [Railway](https://railway.app)
-   - Set environment variables:
-     ```
-     MONGO_URI=your_atlas_connection_string
-     CLERK_SECRET_KEY=sk_live_...
-     ```
+## API Endpoints
 
-2. **Frontend**
-   - Deploy to [Vercel](https://vercel.com)
-   - Set environment variables:
-     ```
-     VITE_API_BASE_URL=https://your-backend-url.com
-     VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
-     ```
+All endpoints require a `Authorization: Bearer <clerk_token>` header.
 
-3. **Clerk Configuration**
-   - Update production redirect URLs
-   - Switch to live API keys
+### Activity
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/activity` | Get all activities for the authenticated user |
+| POST | `/api/activity` | Log a new activity |
+| DELETE | `/api/activity/:id` | Delete an activity by ID |
 
-## 🤝 Contributing
+### Nutrition
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/nutrition` | Get all nutrition logs |
+| POST | `/api/nutrition` | Log a meal |
+| DELETE | `/api/nutrition/:id` | Delete a nutrition log |
 
-We welcome contributions! Please follow these steps:
+### Goals
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/goals` | Get all goals |
+| POST | `/api/goals` | Create a new goal |
+| PUT | `/api/goals/:id` | Update a goal |
+| DELETE | `/api/goals/:id` | Delete a goal |
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+### Profile
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/profile` | Get user profile |
+| POST | `/api/profile` | Create or update profile |
+
+### User
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/user` | Get user data |
+| POST | `/api/user` | Create or sync user |
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Node.js >= 18
+- MongoDB (local or [Atlas](https://cloud.mongodb.com))
+- [Clerk](https://clerk.com) account
+
+### 1. Clone
+
+```bash
+git clone https://github.com/Snehagupta00/TrueGrit.git
+cd TrueGrit
+```
+
+### 2. Backend Setup
+
+```bash
+cd backend
+npm install
+```
+
+Create `backend/.env`:
+```env
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/truegrit
+CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+PORT=5000
+```
+
+```bash
+npm run dev
+```
+
+### 3. Frontend Setup
+
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env`:
+```env
+VITE_API_BASE_URL=http://localhost:5000
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+```
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173)
+
+### 4. Clerk Configuration
+- Go to your Clerk dashboard → Allowed redirect URLs
+- Add `http://localhost:5173`
+- Enable Email and/or Google sign-in
+
+---
+
+## Deployment
+
+### Backend (Render / Railway)
+1. Push `backend/` to your repo
+2. Set environment variables:
+   ```
+   MONGO_URI=...
+   CLERK_PUBLISHABLE_KEY=...
+   CLERK_SECRET_KEY=...
+   ```
+3. Start command: `node server.js`
+
+### Frontend (Vercel)
+1. Connect your repo to Vercel
+2. Set environment variables:
+   ```
+   VITE_API_BASE_URL=https://your-backend.onrender.com
+   VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+   ```
+3. Framework preset: Vite
+
+### Clerk Production
+- Update redirect URLs to your production domain
+- Switch from `pk_test_` / `sk_test_` to live keys
+
+---
+
+## Dark / Light Mode
+
+Theme is implemented via CSS custom properties on `:root` (light) and `.dark` (dark). The `dark` class is toggled on `<html>` via the theme button in the sidebar. All components adapt automatically — no per-component `dark:` Tailwind variants needed.
+
+Key variables: `--bg-page`, `--bg-surface`, `--text-primary`, `--text-muted`, `--border-default`
+
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit: `git commit -m 'feat: add your feature'`
+4. Push: `git push origin feature/your-feature`
 5. Open a Pull Request
 
-## 📜 License
+---
 
-Distributed under the MIT License. See `LICENSE` for more information.
+## License
 
-## 📬 Contact
+MIT — see [LICENSE](LICENSE)
 
-Sneha Gupta - [GitHub](https://github.com/Snehagupta00) - snehagupta@example.com
+---
 
-Project Link: [https://github.com/Snehagupta00/TrueGrit](https://github.com/Snehagupta00/TrueGrit)
-```
+## Authors
 
-### Key Improvements:
-1. **Modern Header** - Added logo and badges for quick tech stack visibility
-2. **Visual Preview** - Space for screenshot (add an actual screenshot later)
-3. **Feature Highlights** - Emoji icons for better scanning
-4. **Tech Stack Table** - Clean, organized technology display
-5. **Simplified Setup** - Streamlined installation steps
-6. **Deployment Section** - Clear platform recommendations
-7. **Consistent Formatting** - Better spacing and organization
-8. **Mobile-Friendly** - Proper markdown structure for GitHub mobile
-
-To complete this:
-1. Add a screenshot named `screenshot.png` to your `public/` folder
-2. Update the contact email with your actual email
-3. Consider adding a demo video link if available
-
-Would you like me to adjust any particular section or add more details about specific features?
+- **Sneha Gupta** — [GitHub](https://github.com/Snehagupta00)
+Project: [https://github.com/Snehagupta00/TrueGrit](https://github.com/Snehagupta00/TrueGrit)
