@@ -13,9 +13,14 @@ const api = axios.create({
 
 // Token management
 let authToken = null;
+let unauthorizedHandler = null;
 
 export const setAuthToken = (token) => {
   authToken = token;
+};
+
+export const setUnauthorizedHandler = (handler) => {
+  unauthorizedHandler = typeof handler === 'function' ? handler : null;
 };
 
 api.interceptors.request.use(
@@ -40,11 +45,9 @@ api.interceptors.response.use(
     if (response) {
       switch (response.status) {
         case 401:
-          toast.error('Session expired. Redirecting to sign-in...');
-          setAuthToken(null); // optional
-          setTimeout(() => {
-            window.location.href = '/sign-in';
-          }, 2000);
+          toast.error('Session expired. Please sign in again.');
+          setAuthToken(null);
+          unauthorizedHandler?.();
           break;
         case 403:
           toast.error('You don\'t have permission for this action.');

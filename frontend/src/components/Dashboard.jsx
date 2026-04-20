@@ -53,8 +53,7 @@ export default function Dashboard() {
         });
       } catch (err) {
         if (err.response?.status === 401) {
-          toast.error('Session expired. Please sign in again.');
-          window.location.href = '/sign-in';
+          return;
         } else {
           toast.error('Failed to load dashboard data.');
         }

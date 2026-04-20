@@ -221,7 +221,7 @@ export default function History() {
                         </p>
                         {isActivity && <p className="text-xs text-gray-400">{item.duration || 0} min</p>}
                         {!isActivity && item.protein != null && (
-                          <p className="text-xs text-gray-400">P:{item.protein}g C:{item.carbs}g F:{item.fat}g</p>
+                          <p className="text-xs text-gray-400">P:{item.protein}g C:{item.carbs}g F:{item.fats}g</p>
                         )}
                       </div>
                     </div>

@@ -6,6 +6,7 @@ const activitySchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   intensity: { type: String, required: true },
   calories: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });
 

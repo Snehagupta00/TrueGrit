@@ -4,7 +4,7 @@ import { useAuth, SignIn, SignUp } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Navbar from './components/NavBar';
-import { setAuthToken } from './lib/api';
+import { setAuthToken, setUnauthorizedHandler } from './lib/api';
 
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const ActivityLog = lazy(() => import('./components/ActivityLog'));
@@ -50,11 +50,23 @@ function App() {
           navigate('/sign-in');
         }
       } else {
+        setAuthToken(null);
         setIsTokenSet(false);
       }
     };
     setupAuthToken();
   }, [isSignedIn, isLoaded, getToken, navigate]);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setIsTokenSet(false);
+      navigate('/sign-in', { replace: true });
+    });
+
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, [navigate]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
